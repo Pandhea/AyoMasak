@@ -14,7 +14,10 @@ Dokumen ini menjelaskan struktur HTML, tanggung jawab stylesheet, dan fungsi/eve
 | [style.css](./style.css)                                                           | Semua CSS yang dipakai halaman. Aturan aplikasi dibatasi dengan kelas `body` masing-masing halaman.                                                           |
 | [recipe-catalog.js](./recipe-catalog.js)                                           | Data bersama enam kota, 18 resep, bahan, cerita, serta jalur gambar dan stempel.                                                                              |
 | [audio.js](./audio.js)                                                             | Mesin musik latar sintetis, efek suara, dan penyimpanan volume musik/efek; dimuat oleh semua halaman aplikasi.                                                |
+| [loading-screen.js](./loading-screen.js)                                           | Menutup layar loading setelah gambar dan font halaman siap; tidak menampilkannya pada panel iframe.                                                         |
 | [script.js](./script.js)                                                           | Menambahkan kelas `concept-ready` setelah DOM siap. File ini saat ini tidak ditautkan oleh halaman HTML.                                                      |
+| `assets/logo/logolomba.jpg`                                                        | Logo sumber asli; dipertahankan tanpa perubahan.                                                                                                             |
+| `assets/logo/ayomasak-logo.svg` dan `assets/logo/ayomasak-logo-clear.png`           | Logo hasil crop transparan dan penajaman untuk layar loading; SVG mandiri menyematkan raster WebP transparan agar detail ilustrasi 3D tetap terjaga.        |
 | `assets/Jawa/Panduan Nama Makanan Utama.png`                                       | Sumber visual 18 makanan dari enam daerah di Jawa; file asli tidak diubah.                                                                                    |
 | `assets/Jawa/{Banten,Jakarta,Bandung,Semarang,Yogyakarta,Surabaya}/`               | 18 PNG hidangan transparan yang dicrop dari ilustrasi resolusi tinggi tertanam pada SVG provinsi, tanpa label; dipakai di indeks masakan dan backstory.       |
 | `assets/Stample/stample.jpeg`                                                      | Lembar sumber enam stempel terbaru; tiap stempel dipisah menjadi PNG transparan berdasarkan nama kota yang tercetak.                                          |
@@ -22,6 +25,8 @@ Dokumen ini menjelaskan struktur HTML, tanggung jawab stylesheet, dan fungsi/eve
 | `assets/gambar-masakan/`                                                           | Folder untuk menyimpan gambar resep lain yang akan ditambahkan berikutnya.                                                                                    |
 
 > Mayoritas JavaScript masih berada di dalam tag `<script>` tiap file HTML. `style.css` adalah stylesheet bersama, bukan JavaScript bersama.
+
+Layar loading bersama memakai logo aplikasi, warna hangat, dan bingkai bergaya permainan. Indikator bergerak selama gambar/font disiapkan, lalu layar memudar setelah siap; halaman yang berjalan di iframe tidak menampilkan layar loading kedua.
 
 ## Alur aplikasi
 

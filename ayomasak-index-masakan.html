@@ -20,6 +20,16 @@
 </head>
 
 <body class="page-recipes">
+  <div class="game-loading-screen" id="gameLoadingScreen" role="status" aria-live="polite">
+    <div class="game-loading-card">
+      <span class="game-loading-spark game-loading-spark--left" aria-hidden="true">✦</span>
+      <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
+      <span class="game-loading-spark game-loading-spark--right" aria-hidden="true">✦</span>
+      <p class="game-loading-title">Siap-siap memasak!</p>
+      <p class="game-loading-message">Menyiapkan petualangan rasa...</p>
+      <div class="game-loading-track" aria-hidden="true"><span></span></div>
+    </div>
+  </div>
   <main>
     <section class="dialog" role="dialog" aria-label="Masakan">
       <div class="panel">
@@ -174,5 +184,6 @@
       }
     });
   </script>
+  <script src="loading-screen.js"></script>
 </body>
 </html>

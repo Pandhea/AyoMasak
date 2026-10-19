@@ -1,6 +1,172 @@
 /* Shared AyoMasak styles. Page-specific rules are scoped by body class. */
 @import url("https://fonts.googleapis.com/css2?family=Anton&family=Fredoka+One&family=Fredoka:wght@400;500;600;700&display=swap");
 
+/* Shared game startup screen. */
+.game-loading-screen{
+  position: fixed;
+  z-index: 20000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255,236,160,.55), transparent 38%),
+    linear-gradient(180deg, #43b7cd 0%, #76c8c6 38%, #e5a04f 72%, #b94e1d 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .38s ease, visibility .38s ease;
+}
+
+.game-loading-screen::before,
+.game-loading-screen::after{
+  position: absolute;
+  z-index: 0;
+  width: min(76vw, 360px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255,245,208,.18);
+  border-radius: 43% 57% 58% 42% / 48% 40% 60% 52%;
+  content: "";
+  pointer-events: none;
+}
+
+.game-loading-screen::before{
+  top: -34vw;
+  left: -28vw;
+  box-shadow: 0 0 0 18px rgba(255,245,208,.06), 0 0 0 42px rgba(255,245,208,.04);
+}
+
+.game-loading-screen::after{
+  right: -34vw;
+  bottom: -40vw;
+  border-color: rgba(255,235,187,.22);
+  box-shadow: 0 0 0 18px rgba(255,235,187,.07), 0 0 0 42px rgba(255,235,187,.04);
+}
+
+.game-loading-card{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 360px);
+  padding: 24px 24px 26px;
+  border: 5px solid #78320f;
+  border-radius: 30px;
+  background: linear-gradient(155deg, #ffe5a0 0%, #ffc266 56%, #e98437 100%);
+  box-shadow:
+    inset 0 0 0 3px rgba(255,242,194,.7),
+    inset 0 -9px 0 rgba(137,53,13,.18),
+    0 10px 0 #54240f,
+    0 20px 30px rgba(62,37,23,.28);
+}
+
+.game-loading-logo{
+  display: block;
+  width: min(68vw, 230px);
+  height: min(68vw, 230px);
+  object-fit: contain;
+  filter: drop-shadow(0 7px 5px rgba(91,40,16,.2));
+  animation: game-loading-bob 2.1s ease-in-out infinite;
+}
+
+.game-loading-title{
+  margin: 4px 0 0;
+  color: #78320f;
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-size: clamp(1.25rem, 5vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(255,245,213,.75);
+}
+
+.game-loading-message{
+  margin: 8px 0 16px;
+  color: #81401c;
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-size: .98rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.game-loading-track{
+  position: relative;
+  width: min(100%, 250px);
+  height: 14px;
+  overflow: hidden;
+  border: 2px solid #77300e;
+  border-radius: 99px;
+  background: #8b421d;
+  box-shadow: inset 0 2px 3px rgba(57,24,8,.35), 0 2px 0 rgba(255,236,186,.65);
+}
+
+.game-loading-track span{
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 0;
+  width: 36%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #b8e975, #58ae4c);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+  animation: game-loading-progress 1.3s ease-in-out infinite;
+}
+
+.game-loading-spark{
+  position: absolute;
+  color: #fff5bd;
+  font-size: 30px;
+  text-shadow: 0 2px 0 #e98c37, 0 3px 6px rgba(100,45,12,.25);
+  animation: game-loading-twinkle 1.4s ease-in-out infinite alternate;
+}
+
+.game-loading-spark--left{
+  top: 29%;
+  left: 9%;
+}
+
+.game-loading-spark--right{
+  top: 17%;
+  right: 8%;
+  font-size: 22px;
+  animation-delay: .5s;
+}
+
+.game-loading-screen.is-hidden{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.embedded .game-loading-screen{
+  display: none;
+}
+
+@keyframes game-loading-bob{
+  0%, 100%{ transform: translateY(0) rotate(-1deg); }
+  50%{ transform: translateY(-7px) rotate(1deg); }
+}
+
+@keyframes game-loading-progress{
+  from{ transform: translateX(-110%); }
+  to{ transform: translateX(290%); }
+}
+
+@keyframes game-loading-twinkle{
+  from{ opacity: .55; transform: scale(.84) rotate(-12deg); }
+  to{ opacity: 1; transform: scale(1.08) rotate(12deg); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .game-loading-screen,
+  .game-loading-logo,
+  .game-loading-track span,
+  .game-loading-spark{
+    animation: none;
+    transition: none;
+  }
+}
+
 /* Existing studio/prototype styles, kept isolated from app pages. */
 body.studio-preview{
   --bg: #0f1215;
