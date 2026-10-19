@@ -1,0 +1,904 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>AyoMasak! – Home</title>
+  <meta name="description" content="AyoMasak! – game memasak mobile berbasis web dengan map Nusantara" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="page-home">
+  <div class="app">
+    <section class="screen map-screen active" id="mapScreen">
+      <div class="map-stage" id="mapStage" aria-label="Peta interaktif, geser untuk menjelajahi">
+        <div class="map-topbar">
+          <div class="profile-chip">AyoMasak!</div>
+          <div class="progress-chip">
+            <span>⭐ <strong id="mapStars">0</strong></span>
+            <span id="mapProgress">0/6</span>
+          </div>
+        </div>
+
+        <div class="map-art" id="mapArt">
+          <img class="map-image" src="assets/maps-crisp-clean.png" alt="Peta Indonesia" draggable="false" />
+          <div class="map-wave-motion" id="mapWaveMotion" aria-hidden="true"></div>
+          <svg class="map-bird-flight" viewBox="0 0 100 48" aria-hidden="true">
+            <path d="M4 25Q16 11 28 25Q40 11 52 25" />
+            <path class="map-bird-flight__small" d="M45 13Q53 4 61 13Q69 4 77 13" />
+            <path class="map-bird-flight__small" d="M68 34Q75 26 82 34Q89 26 96 34" />
+          </svg>
+          <button class="region-btn" data-region="jakarta" type="button">Jakarta</button>
+          <button class="region-btn" data-region="bandung" type="button">Bandung</button>
+          <button class="region-btn" data-region="semarang" type="button">Semarang</button>
+          <button class="region-btn" data-region="bali" type="button">Bali</button>
+          <button class="region-btn" data-region="padang" type="button">Padang</button>
+          <button class="region-btn" data-region="makassar" type="button">Makassar</button>
+        </div>
+
+        <div class="hint-pill">Ketuk Daerah Kamu...</div>
+      </div>
+
+      <button class="settings-btn" type="button" aria-label="Pengaturan">
+        <span class="button-art" aria-hidden="true">
+          <img class="button-art__face" src="assets/Buttons/button-settings-face.png" alt="" draggable="false" />
+          <img class="button-art__frame" src="assets/Buttons/button-settings-frame.png" alt="" draggable="false" />
+        </span>
+      </button>
+
+      <nav class="bottom-menu" aria-label="Menu utama">
+        <button class="menu-btn" type="button" aria-label="Cara Bermain">
+          <span class="button-art" aria-hidden="true">
+            <img class="button-art__face" src="assets/Buttons/button-how-to-play-face.png" alt="" draggable="false" />
+            <img class="button-art__frame" src="assets/Buttons/button-how-to-play-frame.png" alt="" draggable="false" />
+          </span>
+        </button>
+        <button class="menu-btn active" type="button" aria-label="Masakan">
+          <span class="button-art" aria-hidden="true">
+            <img class="button-art__face" src="assets/Buttons/button-recipe-index-face.png" alt="" draggable="false" />
+            <img class="button-art__frame" src="assets/Buttons/button-recipe-index-frame.png" alt=""
+              draggable="false" />
+          </span>
+        </button>
+        <button class="menu-btn" type="button" aria-label="Buku Stempel">
+          <span class="button-art" aria-hidden="true">
+            <img class="button-art__face" src="assets/Buttons/button-stamp-book-face.png" alt="" draggable="false" />
+            <img class="button-art__frame" src="assets/Buttons/button-stamp-book-frame.png" alt="" draggable="false" />
+          </span>
+        </button>
+      </nav>
+    </section>
+
+    <div class="overlay hidden" id="guideOverlay" aria-hidden="true">
+      <div class="overlay-panel">
+        <h3>Cara Bermain</h3>
+        <ul>
+          <li>1. Pilih daerah di peta.</li>
+          <li>2. Pilih bahan yang cocok untuk langkah masak.</li>
+          <li>3. Tekan tombol selesai saat semua bahan sudah benar.</li>
+          <li>4. Selesaikan semua resep untuk mendapatkan stempel.</li>
+        </ul>
+        <div class="overlay-actions">
+          <button class="close-btn" type="button" data-close="guide">Oke</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="stampOverlay" aria-hidden="true">
+      <div class="overlay-panel">
+        <h3>Buku Stempel</h3>
+        <p class="stamp-progress" id="stampProgress"></p>
+        <div class="stamp-grid" id="stampList"></div>
+        <div class="overlay-actions">
+          <button class="close-btn" type="button" data-close="stamp">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="destination-sheet hidden" id="destinationSheet" aria-hidden="true">
+      <div class="destination-sheet__panel" id="destinationPanel" role="dialog" aria-modal="true"
+        aria-label="Destinasi">
+        <iframe class="destination-sheet__frame" id="destinationFrame" title="Destinasi"></iframe>
+      </div>
+    </div>
+
+    <section class="screen game-screen" id="gameScreen">
+      <header class="game-header">
+        <button class="header-action" type="button" id="backBtn">←</button>
+        <div class="header-copy">
+          <h2 id="regionTitle">Jakarta</h2>
+          <small id="stepCounter">Langkah 1/3</small>
+        </div>
+        <button class="header-action" type="button" id="scoreBtn">⭐</button>
+      </header>
+
+      <div class="dish-banner">
+        <div class="dish-emoji" id="dishEmoji">🍛</div>
+        <div class="dish-copy">
+          <strong id="dishName">Nasi Goreng Jakarta</strong>
+          <small id="dishMeta">4 bahan • panas sedang</small>
+        </div>
+      </div>
+
+      <div class="recipe-tabs" id="recipeTabs"></div>
+
+      <div class="game-panel">
+        <div class="panel">
+          <h3>Keranjang Bahan</h3>
+          <div class="ingredients" id="ingredientList"></div>
+        </div>
+
+        <div class="panel cook-panel">
+          <div class="pot-stage">
+            <div class="pot" aria-label="Wajan masak">
+              <div class="pot-rim"></div>
+              <div class="pot-content" id="potContent">🍲</div>
+              <div class="pot-items" id="potItems"></div>
+              <div class="pot-item" id="selectedItem">🍛</div>
+            </div>
+          </div>
+
+          <div class="feedback" id="feedbackText">Pilih bahan yang cocok untuk langkah ini.</div>
+
+          <div class="cook-actions">
+            <button class="ghost-btn" type="button" id="resetBtn">Reset</button>
+            <button class="primary-btn" type="button" id="nextStepBtn">Selesai</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="recipe-list" id="recipeList"></div>
+    </section>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="recipe-catalog.js"></script>
+  <script>
+    const STORAGE_KEY = 'ayoMasakProgress';
+    const regionOrder = ['jakarta', 'bandung', 'semarang', 'bali', 'padang', 'makassar'];
+
+    const regions = {
+      jakarta: {
+        name: 'Jakarta',
+        emoji: '🍛',
+        dish: 'Nasi Goreng Jakarta',
+        steps: [
+          { title: 'Tumis bumbu', ingredients: ['Cabai', 'Bawang', 'Kecap'] },
+          { title: 'Masukkan nasi', ingredients: ['Nasi', 'Telur'] },
+          { title: 'Aduk sampai matang', ingredients: ['Daun bawang', 'Ayam'] }
+        ]
+      },
+      bandung: {
+        name: 'Bandung',
+        emoji: '🍜',
+        dish: 'Mie Kocok Bandung',
+        steps: [
+          { title: 'Siapkan kuah', ingredients: ['Kaldu', 'Bawang'] },
+          { title: 'Tambahkan mie', ingredients: ['Mie', 'Bihun'] },
+          { title: 'Sajikan dengan topping', ingredients: ['Ayam', 'Daun bawang'] }
+        ]
+      },
+      semarang: {
+        name: 'Semarang',
+        emoji: '🥟',
+        dish: 'Lumpia Semarang',
+        steps: [
+          { title: 'Buat isian', ingredients: ['Rebung', 'Telur'] },
+          { title: 'Gulung kulit', ingredients: ['Kulit lumpia', 'Ayam'] },
+          { title: 'Goreng sampai renyah', ingredients: ['Minyak', 'Cabai'] }
+        ]
+      },
+      bali: {
+        name: 'Bali',
+        emoji: '🥘',
+        dish: 'Sate Lilit Bali',
+        steps: [
+          { title: 'Buat adonan', ingredients: ['Ikan', 'Kelapa'] },
+          { title: 'Lilit ke bambu', ingredients: ['Bambu', 'Cabai'] },
+          { title: 'Bakar hingga matang', ingredients: ['Minyak', 'Bawang'] }
+        ]
+      },
+      padang: {
+        name: 'Padang',
+        emoji: '🍲',
+        dish: 'Rendang Padang',
+        steps: [
+          { title: 'Tumis rempah', ingredients: ['Cabai', 'Bawang'] },
+          { title: 'Masukkan daging', ingredients: ['Daging', 'Kelapa'] },
+          { title: 'Masak sampai kering', ingredients: ['Santan', 'Daun kunyit'] }
+        ]
+      },
+      makassar: {
+        name: 'Makassar',
+        emoji: '🍱',
+        dish: 'Coto Makassar',
+        steps: [
+          { title: 'Buat kaldu', ingredients: ['Kaldu', 'Bawang'] },
+          { title: 'Masukkan daging', ingredients: ['Daging', 'Kacang'] },
+          { title: 'Sajikan hangat', ingredients: ['Daun bawang', 'Cabai'] }
+        ]
+      }
+    };
+
+    const ingredients = {
+      Nasi: '🍚',
+      Telur: '🥚',
+      Cabai: '🌶️',
+      Bawang: '🧅',
+      Kecap: '🧴',
+      Daun: '🌿',
+      'Daun bawang': '🌿',
+      Ayam: '🍗',
+      Kaldu: '🥣',
+      Mie: '🍝',
+      Bihun: '🍜',
+      Rebung: '🎋',
+      'Kulit lumpia': '🥟',
+      Minyak: '🫒',
+      Ikan: '🐟',
+      Kelapa: '🥥',
+      Daging: '🥩',
+      Santan: '🥥',
+      'Daun kunyit': '🌿',
+      Kacang: '🥜',
+      Bambu: '🪵'
+    };
+
+    const pantry = [
+      'Cabai', 'Bawang', 'Kecap', 'Nasi', 'Telur', 'Daun bawang', 'Ayam', 'Kaldu', 'Mie', 'Bihun', 'Rebung', 'Kulit lumpia', 'Minyak', 'Ikan', 'Kelapa', 'Daging', 'Santan', 'Daun kunyit', 'Kacang', 'Bambu'
+    ];
+
+    const defaultSave = { completedRegions: [], cookingStamps: [], cookingStampEmojis: {}, completedDishesByCity: {}, stars: 0 };
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || JSON.stringify(defaultSave));
+    const state = {
+      region: 'jakarta',
+      step: 0,
+      selected: [],
+      completedRegions: new Set(saved.completedRegions || []),
+      cookingStamps: new Set(saved.cookingStamps || []),
+      cookingStampEmojis: saved.cookingStampEmojis || {},
+      completedDishesByCity: saved.completedDishesByCity || {},
+      stars: Number(saved.stars || 0)
+    };
+
+    const mapScreen = document.getElementById('mapScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const regionButtons = [...document.querySelectorAll('.region-btn')];
+    const ingredientList = document.getElementById('ingredientList');
+    const recipeTabs = document.getElementById('recipeTabs');
+    const recipeList = document.getElementById('recipeList');
+    const feedbackText = document.getElementById('feedbackText');
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const regionTitle = document.getElementById('regionTitle');
+    const stepCounter = document.getElementById('stepCounter');
+    const dishName = document.getElementById('dishName');
+    const dishMeta = document.getElementById('dishMeta');
+    const dishEmoji = document.getElementById('dishEmoji');
+    const selectedItem = document.getElementById('selectedItem');
+    const potItems = document.getElementById('potItems');
+    const backBtn = document.getElementById('backBtn');
+    const scoreBtn = document.getElementById('scoreBtn');
+    const mapStars = document.getElementById('mapStars');
+    const mapProgress = document.getElementById('mapProgress');
+    const guideOverlay = document.getElementById('guideOverlay');
+    const stampOverlay = document.getElementById('stampOverlay');
+    const stampList = document.getElementById('stampList');
+    const stampProgress = document.getElementById('stampProgress');
+    const menuButtons = [...document.querySelectorAll('.menu-btn')];
+    const mapStage = document.getElementById('mapStage');
+    const mapArt = document.getElementById('mapArt');
+    const mapImage = mapArt.querySelector('.map-image');
+    const mapWaveMotion = document.getElementById('mapWaveMotion');
+    const destinationSheet = document.getElementById('destinationSheet');
+    const destinationPanel = document.getElementById('destinationPanel');
+    const destinationFrame = document.getElementById('destinationFrame');
+
+    let mapPan = { x: 0, y: 0 };
+    let mapZoom = 1;
+    let mapPointer = null;
+    let activeMapPointers = new Map();
+    let mapPinch = null;
+    let mapDragTimer = 0;
+    let isMapDragging = false;
+    let suppressRegionClick = false;
+    const mapWaveDetails = [
+      [725, 404, 775, 418, 4, 33, 6.5], [752, 429, 819, 441, 15, 25, 7.2],
+      [1584, 456, 1638, 469, -14, 36, 7.4], [1537, 477, 1594, 489, -17, 30, 6.8], [1622, 496, 1651, 503, -24, 30, 6.1],
+      [1068, 590, 1111, 606, 25, 16, 6.8], [199, 710, 238, 722, 25, -18, 7.2], [193, 738, 226, 746, 30, -22, 6.6],
+      [1645, 689, 1714, 705, -28, -36, 7.1], [786, 835, 875, 865, 14, -35, 7.8],
+      [1311, 849, 1384, 864, -10, -32, 6.9], [1845, 896, 1871, 906, -38, -20, 6.7], [1796, 917, 1826, 927, -34, -25, 7.5],
+      [414, 991, 517, 1003, -10, -32, 7.1], [519, 996, 544, 1000, -18, -30, 6.3], [457, 1015, 508, 1025, -12, -34, 7.7],
+      [513, 1027, 534, 1034, -16, -36, 6.6], [1611, 1027, 1639, 1032, -10, -42, 7.4], [1655, 1037, 1733, 1053, -24, -38, 6.8],
+      [1436, 1052, 1538, 1067, -6, -36, 7.6], [1150, 1075, 1232, 1099, 12, -34, 7.2], [1465, 1080, 1515, 1092, -5, -34, 6.5],
+      [1528, 1081, 1552, 1090, -18, -31, 7.8], [137, 1129, 167, 1143, 30, -36, 6.9], [70, 1130, 112, 1143, 37, -30, 7.3],
+      [48, 1165, 82, 1179, 34, -24, 6.7]
+    ];
+
+    mapWaveDetails.forEach(([x0, y0, x1, y1, driftX, driftY, duration], index) => {
+      const wave = document.createElement('span');
+      const left = x0 - 4;
+      const top = y0 - 4;
+      const width = x1 - x0 + 9;
+      const height = y1 - y0 + 9;
+      wave.className = 'map-wave-detail';
+      wave.style.left = `${left / 2048 * 100}%`;
+      wave.style.top = `${top / 1476 * 100}%`;
+      wave.style.width = `${width / 2048 * 100}%`;
+      wave.style.height = `${height / 1476 * 100}%`;
+      wave.style.backgroundSize = `${2048 / width * 100}% ${1476 / height * 100}%`;
+      wave.style.backgroundPosition =
+        `${left / (2048 - width) * 100}% ${top / (1476 - height) * 100}%`;
+      const travelX = driftX === 0 ? 0 : Math.sign(driftX) * Math.max(32, Math.abs(driftX) * 2);
+      const travelY = driftY === 0 ? 0 : Math.sign(driftY) * Math.max(36, Math.abs(driftY) * 2);
+      wave.style.setProperty('--wave-drift-x', `${travelX / width * 100}%`);
+      wave.style.setProperty('--wave-drift-y', `${travelY / height * 100}%`);
+      wave.style.setProperty('--wave-duration', `${duration}s`);
+      wave.style.setProperty('--wave-delay', `${index % 12 * 0.28}s`);
+      mapWaveMotion.appendChild(wave);
+    });
+
+    function getMaxMapZoom() {
+      if (!mapImage.naturalWidth || !mapImage.naturalHeight) return 1;
+      const widthLimit = mapImage.naturalWidth / mapArt.clientWidth;
+      const heightLimit = mapImage.naturalHeight / mapArt.clientHeight;
+      return Math.max(1, Math.min(3, widthLimit, heightLimit));
+    }
+
+    function clampMapPan() {
+      const maxPanX = Math.max(0, (mapArt.clientWidth * mapZoom - mapStage.clientWidth) / 2);
+      const maxPanY = Math.max(0, (mapArt.clientHeight * mapZoom - mapStage.clientHeight) / 2);
+      mapPan.x = Math.max(-maxPanX, Math.min(maxPanX, mapPan.x));
+      mapPan.y = Math.max(-maxPanY, Math.min(maxPanY, mapPan.y));
+    }
+
+    function applyMapTransform() {
+      clampMapPan();
+      mapArt.style.setProperty('--map-pan-x', `${mapPan.x}px`);
+      mapArt.style.setProperty('--map-pan-y', `${mapPan.y}px`);
+      mapArt.style.setProperty('--map-zoom', mapZoom);
+    }
+
+    function zoomMap(
+      nextZoom,
+      clientX = mapStage.getBoundingClientRect().left + mapStage.clientWidth / 2,
+      clientY = mapStage.getBoundingClientRect().top + mapStage.clientHeight / 2
+    ) {
+      const stageRect = mapStage.getBoundingClientRect();
+      const anchorX = clientX - stageRect.left;
+      const anchorY = clientY - stageRect.top;
+      const nextScale = Math.max(1, Math.min(getMaxMapZoom(), nextZoom));
+      if (nextScale === mapZoom) return;
+
+      const relativeX = (anchorX - mapStage.clientWidth / 2 - mapPan.x) / mapZoom;
+      const relativeY = (anchorY - mapStage.clientHeight / 2 - mapPan.y) / mapZoom;
+      mapZoom = nextScale;
+      mapPan.x = anchorX - mapStage.clientWidth / 2 - relativeX * mapZoom;
+      mapPan.y = anchorY - mapStage.clientHeight / 2 - relativeY * mapZoom;
+      applyMapTransform();
+    }
+
+    function getMapPointerPoint(event) {
+      return { x: event.clientX, y: event.clientY };
+    }
+
+    function getPointerDistance(first, second) {
+      return Math.hypot(second.x - first.x, second.y - first.y);
+    }
+
+    function startMapPointer(event) {
+      if (event.pointerType !== 'touch' && event.button !== 0) return;
+
+      clearTimeout(mapDragTimer);
+      const point = getMapPointerPoint(event);
+      activeMapPointers.set(event.pointerId, point);
+      const captureElement = event.target instanceof Element ? event.target : mapStage;
+      captureElement.setPointerCapture(event.pointerId);
+
+      if (activeMapPointers.size === 1) {
+        mapPointer = {
+          id: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          panX: mapPan.x,
+          panY: mapPan.y,
+          captureElement
+        };
+        isMapDragging = false;
+      } else if (activeMapPointers.size === 2) {
+        const [first, second] = [...activeMapPointers.entries()];
+        mapPinch = {
+          pointerIds: [first[0], second[0]],
+          startDistance: Math.max(1, getPointerDistance(first[1], second[1])),
+          startZoom: mapZoom
+        };
+        mapPointer = null;
+        isMapDragging = true;
+        mapScreen.classList.add('is-panning');
+        mapStage.classList.add('is-dragging');
+      }
+    }
+
+    function moveMapPointer(event) {
+      if (!activeMapPointers.has(event.pointerId)) return;
+      activeMapPointers.set(event.pointerId, getMapPointerPoint(event));
+
+      if (mapPinch && mapPinch.pointerIds.includes(event.pointerId)) {
+        const [first, second] = mapPinch.pointerIds.map(id => activeMapPointers.get(id));
+        if (!first || !second) return;
+        const midpoint = {
+          x: (first.x + second.x) / 2,
+          y: (first.y + second.y) / 2
+        };
+        const distanceRatio = getPointerDistance(first, second) / mapPinch.startDistance;
+        zoomMap(mapPinch.startZoom * distanceRatio, midpoint.x, midpoint.y);
+        return;
+      }
+      if (!mapPointer || event.pointerId !== mapPointer.id) return;
+
+      const deltaX = event.clientX - mapPointer.startX;
+      const deltaY = event.clientY - mapPointer.startY;
+      if (!isMapDragging && Math.hypot(deltaX, deltaY) < 6) return;
+
+      if (!isMapDragging) {
+        isMapDragging = true;
+        mapScreen.classList.add('is-panning');
+        mapStage.classList.add('is-dragging');
+      }
+
+      mapPan.x = mapPointer.panX + deltaX;
+      mapPan.y = mapPointer.panY + deltaY;
+      applyMapTransform();
+    }
+
+    function endMapPointer(event) {
+      if (!activeMapPointers.has(event.pointerId)) return;
+
+      const wasDragging = isMapDragging;
+      const captureElement = event.target instanceof Element ? event.target : mapStage;
+      if (captureElement.hasPointerCapture(event.pointerId)) {
+        captureElement.releasePointerCapture(event.pointerId);
+      }
+      activeMapPointers.delete(event.pointerId);
+
+      if (activeMapPointers.size === 1) {
+        const [remainingId, remainingPoint] = [...activeMapPointers.entries()][0];
+        mapPinch = null;
+        mapPointer = {
+          id: remainingId,
+          startX: remainingPoint.x,
+          startY: remainingPoint.y,
+          panX: mapPan.x,
+          panY: mapPan.y,
+          captureElement: mapStage
+        };
+        isMapDragging = false;
+      } else if (activeMapPointers.size === 0) {
+        mapPinch = null;
+        mapPointer = null;
+        isMapDragging = false;
+      }
+
+      if (wasDragging) {
+        suppressRegionClick = true;
+        window.setTimeout(() => {
+          suppressRegionClick = false;
+        }, 350);
+        mapDragTimer = window.setTimeout(() => {
+          mapScreen.classList.remove('is-panning');
+          mapStage.classList.remove('is-dragging');
+        }, 220);
+      }
+    }
+
+    mapStage.addEventListener('pointerdown', startMapPointer);
+    mapStage.addEventListener('pointermove', moveMapPointer);
+    mapStage.addEventListener('pointerup', endMapPointer);
+    mapStage.addEventListener('pointercancel', endMapPointer);
+    mapStage.addEventListener('lostpointercapture', endMapPointer);
+    mapStage.addEventListener('wheel', event => {
+      event.preventDefault();
+      zoomMap(mapZoom * (event.deltaY < 0 ? 1.12 : 1 / 1.12), event.clientX, event.clientY);
+    }, { passive: false });
+
+    window.addEventListener('resize', () => {
+      mapZoom = Math.min(mapZoom, getMaxMapZoom());
+      applyMapTransform();
+    });
+    mapImage.addEventListener('load', applyMapTransform, { once: true });
+    applyMapTransform();
+
+    function persistProgress() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        completedRegions: [...state.completedRegions],
+        cookingStamps: [...state.cookingStamps],
+        cookingStampEmojis: state.cookingStampEmojis,
+        completedDishesByCity: state.completedDishesByCity,
+        stars: state.stars
+      }));
+    }
+
+    function updateMapProgress() {
+      const completedCount = state.completedRegions.size;
+      mapStars.textContent = state.stars;
+      mapProgress.textContent = `${completedCount}/${regionOrder.length}`;
+
+      regionButtons.forEach(button => {
+        const regionKey = button.dataset.region;
+        const regionIndex = regionOrder.indexOf(regionKey);
+        const unlocked = regionIndex <= completedCount;
+        button.classList.toggle('locked', !unlocked);
+        button.disabled = !unlocked;
+      });
+    }
+
+    function showScreen(name) {
+      mapScreen.classList.toggle('active', name === 'map');
+      gameScreen.classList.toggle('active', name === 'game');
+
+      menuButtons.forEach(button => {
+        const isActive = button.getAttribute('aria-label') === (name === 'map' ? 'Masakan' : 'Masakan') && name === 'game';
+        button.classList.toggle('active', isActive && button.getAttribute('aria-label') === 'Masakan');
+      });
+    }
+
+    function getCurrentRegion() {
+      return regions[state.region];
+    }
+
+    function renderPotSelection() {
+      if (!state.selected.length) {
+        potItems.innerHTML = '';
+        selectedItem.classList.remove('visible');
+        selectedItem.textContent = '🍲';
+        return;
+      }
+
+      potItems.innerHTML = state.selected
+        .map(item => `<span class="pot-ingredient">${ingredients[item] || '🥬'}</span>`)
+        .join('');
+
+      selectedItem.textContent = ingredients[state.selected[state.selected.length - 1]] || '🥬';
+      selectedItem.classList.add('visible');
+    }
+
+    function renderStampGrid() {
+      stampList.innerHTML = '';
+      let unlockedCount = 0;
+      window.AyoDishCatalog.cities.forEach(city => {
+        const completedDishes = Array.isArray(state.completedDishesByCity[city.key])
+          ? state.completedDishesByCity[city.key]
+          : [];
+        const completedCount = city.dishes.filter(dish => completedDishes.includes(dish.id)).length;
+        const unlocked = completedCount === city.dishes.length;
+        if (unlocked) unlockedCount += 1;
+        const stamp = document.createElement('div');
+        stamp.className = `stamp ${unlocked ? 'unlocked' : ''}`;
+        stamp.setAttribute('aria-label', unlocked
+          ? `Stempel ${city.name} sudah dikoleksi`
+          : `Stempel ${city.name} belum dikoleksi, ${completedCount} dari ${city.dishes.length} masakan selesai`);
+        stamp.title = unlocked
+          ? `${city.name} — sudah dikoleksi`
+          : `${city.name} — ${completedCount}/${city.dishes.length} masakan selesai`;
+        const image = document.createElement('img');
+        image.className = 'stamp__image';
+        image.src = city.stamp;
+        image.alt = unlocked ? `Stempel Kota ${city.name}` : '';
+        image.draggable = false;
+        const name = document.createElement('span');
+        name.className = 'stamp__name';
+        name.textContent = city.name;
+        const progress = document.createElement('span');
+        progress.className = 'stamp__progress';
+        progress.textContent = unlocked ? 'Lengkap' : `${completedCount}/${city.dishes.length} masakan`;
+        stamp.append(image, name, progress);
+        stampList.appendChild(stamp);
+      });
+      stampProgress.textContent = `${unlockedCount}/${window.AyoDishCatalog.cities.length} stempel kota dikoleksi`;
+    }
+
+    function hideOverlay(name) {
+      if (name === 'guide') guideOverlay.classList.add('hidden');
+      if (name === 'stamp') stampOverlay.classList.add('hidden');
+    }
+
+    function showOverlay(name) {
+      if (name === 'guide') guideOverlay.classList.remove('hidden');
+      if (name === 'stamp') {
+        renderStampGrid();
+        stampOverlay.classList.remove('hidden');
+      }
+    }
+
+    function openDestination(regionKey) {
+      const region = regions[regionKey];
+      if (!region) return;
+      destinationPanel.classList.remove('destination-sheet__panel--center');
+      destinationSheet.classList.remove('destination-sheet--center');
+      destinationPanel.setAttribute('aria-label', `Destinasi ${region.name}`);
+      destinationFrame.title = `Destinasi ${region.name}`;
+      destinationFrame.src = `ayomasak-destinasi.html?region=${encodeURIComponent(regionKey)}&embed=1`;
+      destinationSheet.classList.remove('hidden');
+      destinationSheet.setAttribute('aria-hidden', 'false');
+    }
+
+    function openHomePanel(path, title, centered = false) {
+      destinationSheet.classList.toggle('destination-sheet--center', centered);
+      destinationPanel.classList.toggle('destination-sheet__panel--center', centered);
+      destinationPanel.setAttribute('aria-label', title);
+      destinationFrame.title = title;
+      destinationFrame.src = `${path}?embed=1`;
+      destinationSheet.classList.remove('hidden');
+      destinationSheet.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeDestination() {
+      destinationSheet.classList.add('hidden');
+      destinationSheet.setAttribute('aria-hidden', 'true');
+    }
+
+    destinationSheet.addEventListener('click', event => {
+      if (event.target === destinationSheet) closeDestination();
+    });
+
+    destinationPanel.addEventListener('click', event => {
+      if (event.target === destinationPanel && destinationSheet.classList.contains('destination-sheet--center')) {
+        closeDestination();
+      }
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !destinationSheet.classList.contains('hidden')) {
+        closeDestination();
+      }
+    });
+
+    window.addEventListener('message', event => {
+      if (event.origin !== window.location.origin || event.source !== destinationFrame.contentWindow) return;
+      if (event.data?.type === 'close-destination' || event.data?.type === 'close-home-panel') closeDestination();
+      if (event.data?.type === 'audio-start') window.AyoAudio.startMusic();
+      if (event.data?.type === 'audio-settings') window.AyoAudio.setSettings(event.data.settings);
+      if (event.data?.type === 'audio-tone') {
+        const { frequency, duration, volume } = event.data;
+        if ([frequency, duration, volume].every(Number.isFinite)) {
+          window.AyoAudio.playTone(frequency, duration, volume);
+        }
+      }
+      if (event.data?.type === 'start-cooking' && regionOrder.includes(event.data.region)) {
+        window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(event.data.region)}`;
+      }
+      if (event.data?.type === 'start-recipe') {
+        const city = window.AyoDishCatalog.cities.find(item => item.key === event.data.region);
+        if (city?.dishes.some(dish => dish.id === event.data.dish)) {
+          const query = new URLSearchParams({ region: city.key, dish: event.data.dish });
+          window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+        }
+      }
+    });
+
+    function resetSelection() {
+      state.selected = [];
+      renderPotSelection();
+      [...document.querySelectorAll('.ingredient')].forEach(el => el.classList.remove('selected'));
+      feedbackText.textContent = 'Pilih bahan yang cocok untuk langkah ini.';
+    }
+
+    function renderTabs() {
+      const region = getCurrentRegion();
+      recipeTabs.innerHTML = '';
+      region.steps.forEach((step, index) => {
+        const tab = document.createElement('button');
+        tab.type = 'button';
+        tab.className = 'recipe-tab ' + (index === state.step ? 'active' : '');
+        tab.textContent = `Langkah ${index + 1}`;
+        tab.addEventListener('click', () => {
+          state.step = index;
+          resetSelection();
+          render();
+        });
+        recipeTabs.appendChild(tab);
+      });
+    }
+
+    function renderIngredientList() {
+      ingredientList.innerHTML = '';
+      pantry.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'ingredient';
+        btn.setAttribute('data-name', item);
+        btn.innerHTML = `<span class="emoji">${ingredients[item] || '🥬'}</span><span>${item}</span>`;
+
+        if (state.selected.includes(item)) {
+          btn.classList.add('selected');
+        }
+
+        btn.addEventListener('click', () => {
+          const step = getCurrentRegion().steps[state.step];
+          const selectedIndex = state.selected.indexOf(item);
+
+          if (selectedIndex >= 0) {
+            state.selected.splice(selectedIndex, 1);
+          } else {
+            state.selected.push(item);
+          }
+
+          renderPotSelection();
+          [...document.querySelectorAll('.ingredient')].forEach(el => {
+            const sameItem = el.getAttribute('data-name') === item;
+            el.classList.toggle('selected', state.selected.includes(item) && sameItem);
+          });
+
+          const hasRequired = step.ingredients.every(req => state.selected.includes(req));
+          const hasExtra = state.selected.some(selectedName => !step.ingredients.includes(selectedName));
+
+          if (!state.selected.length) {
+            feedbackText.textContent = 'Pilih bahan yang cocok untuk langkah ini.';
+          } else if (hasRequired && !hasExtra) {
+            feedbackText.textContent = `Bagus! Semua bahan untuk ${step.title} sudah lengkap.`;
+          } else if (hasExtra) {
+            feedbackText.textContent = `${item} tidak masuk resep ${step.title}. Coba bahan yang benar.`;
+          } else {
+            feedbackText.textContent = `Masih kurang: ${step.ingredients.filter(req => !state.selected.includes(req)).join(', ')}`;
+          }
+        });
+
+        ingredientList.appendChild(btn);
+      });
+    }
+
+    function renderRecipeList() {
+      const region = getCurrentRegion();
+      recipeList.innerHTML = '';
+      region.steps.forEach((step, index) => {
+        const row = document.createElement('div');
+        const isDone = index < state.step;
+        row.className = 'recipe-step ' + (isDone ? 'done' : '');
+        row.innerHTML = `
+          <div class="num">${index + 1}</div>
+          <div>
+            <strong>${step.title}</strong><br>
+            <span>${step.ingredients.join(', ')}</span>
+          </div>
+        `;
+        recipeList.appendChild(row);
+      });
+    }
+
+    function render() {
+      const region = getCurrentRegion();
+      const step = region.steps[state.step];
+      regionTitle.textContent = region.name;
+      stepCounter.textContent = `Langkah ${state.step + 1}/${region.steps.length}`;
+      dishName.textContent = region.dish;
+      dishMeta.textContent = `${step.ingredients.length} bahan • ${state.step + 1}/${region.steps.length}`;
+      dishEmoji.textContent = region.emoji;
+      scoreBtn.textContent = `⭐ ${state.stars}`;
+      updateMapProgress();
+      renderTabs();
+      renderIngredientList();
+      renderRecipeList();
+      renderPotSelection();
+    }
+
+    function finishCurrentStep() {
+      const region = getCurrentRegion();
+      const step = region.steps[state.step];
+      const isValid = step.ingredients.every(item => state.selected.includes(item)) &&
+        state.selected.every(item => step.ingredients.includes(item));
+
+      if (isValid) {
+        state.step += 1;
+        state.stars += 1;
+        state.selected = [];
+        feedbackText.textContent = `Berhasil! ${step.title} selesai.`;
+
+        if (state.step >= region.steps.length) {
+          state.completedRegions.add(state.region);
+          persistProgress();
+          feedbackText.textContent = `🎉 ${region.name} selesai! Kamu hebat.`;
+          state.step = region.steps.length - 1;
+          showOverlay('stamp');
+        }
+      } else if (!state.selected.length) {
+        feedbackText.textContent = 'Belum ada bahan di wajan. Pilih bahan yang cocok.';
+      } else {
+        const missing = step.ingredients.filter(item => !state.selected.includes(item));
+        feedbackText.textContent = `Masih kurang: ${missing.join(', ')}.`;
+      }
+
+      persistProgress();
+      render();
+    }
+
+    function openGame(regionKey) {
+      const regionIndex = regionOrder.indexOf(regionKey);
+      const unlockIndex = state.completedRegions.size;
+      if (regionIndex > unlockIndex) {
+        feedbackText.textContent = 'Daerah ini belum terbuka. Selesaikan resep sebelumnya dulu.';
+        showScreen('map');
+        return;
+      }
+
+      state.region = regionKey;
+      state.step = 0;
+      state.selected = [];
+      showScreen('game');
+      render();
+    }
+
+    function playTone(freq, duration, volume = 0.04) {
+      window.AyoAudio.playTone(freq, duration, volume);
+    }
+
+    regionButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        if (suppressRegionClick) return;
+        if (!button.disabled) {
+          playTone(440, 120, 0.03);
+          openDestination(button.dataset.region);
+        }
+      });
+    });
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+      playTone(260, 80, 0.03);
+      showScreen('map');
+    });
+
+    nextStepBtn.addEventListener('click', () => {
+      playTone(660, 120, 0.04);
+      finishCurrentStep();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      playTone(180, 100, 0.02);
+      resetSelection();
+    });
+
+    menuButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const label = button.getAttribute('aria-label');
+
+        if (label === 'Cara Bermain') {
+          showOverlay('guide');
+          showScreen('map');
+          return;
+        }
+
+        if (label === 'Buku Stempel') {
+          showOverlay('stamp');
+          showScreen('map');
+          return;
+        }
+
+        if (label === 'Masakan') {
+          openHomePanel('ayomasak-index-masakan.html', 'Masakan');
+        }
+      });
+    });
+
+    document.querySelector('.settings-btn').addEventListener('click', () => {
+      playTone(520, 100, 0.03);
+      openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
+    });
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.close;
+        hideOverlay(target === 'guide' ? 'guide' : 'stamp');
+      });
+    });
+
+    showScreen('map');
+    updateMapProgress();
+    renderStampGrid();
+    render();
+  </script>
+</body>
+
+</html>

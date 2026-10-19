@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AyoMasak! – Pilih Masakan</title>
+  <meta name="description" content="AyoMasak! – pilih makanan untuk mulai memasak.">
+  <script src="audio.js"></script>
+  <script>
+    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+      document.documentElement.classList.add('embedded');
+    }
+  </script>
+
+  <!--
+    ASSETS (export from Figma node 157:1746, save into ./assets/ next to this file):
+      assets/logo-masakan-destinasi.png  <- https://www.figma.com/api/mcp/asset/d7c6ca08-8361-461c-8e91-38f02e6fe878.png
+      assets/kerak-telor-destinasi.png   <- https://www.figma.com/api/mcp/asset/c5cef4ff-f13f-4d92-836a-947f76bab7dd.png
+    (temporary Figma URLs, valid ~7 days: curl -L -o <file> "<url>")
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="page-destination">
+  <main>
+    <section class="dialog" role="dialog" aria-label="Pilih Masakan">
+      <div class="panel">
+
+        <h1 class="panel__logo">
+          <span aria-hidden="true">🍽️</span>
+          <span>Destinasi</span>
+        </h1>
+
+        <button class="close-button" type="button" aria-label="Tutup">
+          <span class="close-button__base"></span>
+          <span class="close-button__face">
+            <span class="close-button__label close-button__label--shadow" aria-hidden="true">X</span>
+            <span class="close-button__label" aria-hidden="true">X</span>
+          </span>
+        </button>
+
+        <div class="index">
+          <ul class="index__list" id="destinationDishes" aria-label="Pilih masakan">
+
+            <li class="dish-card-item dish-card-item--col-1" hidden>
+              <button class="dish-card dish-card--kerak-telor" type="button">
+                <span class="dish-card__well"></span>
+                <span class="dish-card__face">
+                  <span class="dish-card__icon">
+                    <span class="dish-card__emoji" aria-hidden="true">🍳</span>
+                    <img class="dish-card__photo" alt="" hidden>
+                  </span>
+                </span>
+                <span class="dish-card__label dish-card__label--region dish-card__label--shadow" aria-hidden="true">Jakarta</span>
+                <span class="dish-card__label dish-card__label--name dish-card__label--shadow" aria-hidden="true">Kerak Telor</span>
+                <span class="dish-card__label dish-card__label--region">Jakarta</span>
+                <span class="dish-card__label dish-card__label--name">Kerak Telor</span>
+              </button>
+            </li>
+
+            <li class="dish-card-item dish-card-item--col-2" hidden>
+              <button class="dish-card dish-card--kerak-telor" type="button">
+                <span class="dish-card__well"></span>
+                <span class="dish-card__face">
+                  <span class="dish-card__icon">
+                    <span class="dish-card__emoji" aria-hidden="true">🍳</span>
+                    <img class="dish-card__photo" alt="" hidden>
+                  </span>
+                </span>
+                <span class="dish-card__label dish-card__label--region dish-card__label--shadow" aria-hidden="true">Jakarta</span>
+                <span class="dish-card__label dish-card__label--name dish-card__label--shadow" aria-hidden="true">Kerak Telor</span>
+                <span class="dish-card__label dish-card__label--region">Jakarta</span>
+                <span class="dish-card__label dish-card__label--name">Kerak Telor</span>
+              </button>
+            </li>
+
+            <li class="dish-card-item dish-card-item--col-3" hidden>
+              <button class="dish-card dish-card--kerak-telor" type="button">
+                <span class="dish-card__well"></span>
+                <span class="dish-card__face">
+                  <span class="dish-card__icon">
+                    <span class="dish-card__emoji" aria-hidden="true">🍳</span>
+                    <img class="dish-card__photo" alt="" hidden>
+                  </span>
+                </span>
+                <span class="dish-card__label dish-card__label--region dish-card__label--shadow" aria-hidden="true">Jakarta</span>
+                <span class="dish-card__label dish-card__label--name dish-card__label--shadow" aria-hidden="true">Kerak Telor</span>
+                <span class="dish-card__label dish-card__label--region">Jakarta</span>
+                <span class="dish-card__label dish-card__label--name">Kerak Telor</span>
+              </button>
+            </li>
+
+          </ul>
+        </div>
+
+        <div class="notice">
+          <p class="notice__text notice__text--shadow" aria-hidden="true">Kamu memilih kota x, berikut makanan yang akan kamu masak!</p>
+          <p class="notice__text">Kamu memilih kota x, berikut makanan yang akan kamu masak!</p>
+        </div>
+
+        <p class="hint hint--shadow" aria-hidden="true">Pilih Makanan untuk mulai memasak!</p>
+        <p class="hint">Pilih Makanan untuk mulai memasak!</p>
+
+      </div>
+    </section>
+  </main>
+  <script src="recipe-catalog.js"></script>
+  <script>
+    const destinations = {
+      jakarta: { name: 'Jakarta', dish: 'Kerak Telor', emoji: '🍳', image: 'assets/Jawa/Jakarta/kerak-telor.png' },
+      bandung: { name: 'Bandung', dish: 'Mie Kocok', emoji: '🍜' },
+      semarang: { name: 'Semarang', dish: 'Lumpia Semarang', emoji: '🥟' },
+      bali: { name: 'Bali', dish: 'Sate Lilit', emoji: '🍢' },
+      padang: { name: 'Padang', dish: 'Rendang', emoji: '🍛' },
+      makassar: { name: 'Makassar', dish: 'Coto Makassar', emoji: '🥣' }
+    };
+    const params = new URLSearchParams(window.location.search);
+    const regionKey = params.get('region') || 'jakarta';
+    const destination = destinations[regionKey] || destinations.jakarta;
+    const city = window.AyoDishCatalog.cities.find(item => item.key === regionKey);
+    const embedded = params.get('embed') === '1';
+    const cardItems = [...document.querySelectorAll('.dish-card-item')];
+    const closeButton = document.querySelector('.close-button');
+    const destinationName = city?.city || destination.name;
+    const dishes = city?.dishes || [{
+      id: regionKey,
+      dish: destination.dish,
+      emoji: destination.emoji,
+      image: destination.image
+    }];
+
+    document.querySelectorAll('.notice__text').forEach(text => {
+      text.textContent = `Kamu memilih ${destinationName}, pilih masakan yang ingin kamu buat!`;
+    });
+
+    dishes.forEach((dish, index) => {
+      const item = cardItems[index];
+      if (!item) throw new Error(`Slot kartu untuk ${dish.dish} tidak tersedia.`);
+      item.hidden = false;
+      const card = item.querySelector('.dish-card');
+      const labels = card.querySelectorAll('.dish-card__label:not(.dish-card__label--shadow)');
+      const shadows = card.querySelectorAll('.dish-card__label--shadow');
+      labels[0].textContent = destinationName;
+      labels[1].textContent = dish.dish;
+      shadows[0].textContent = destinationName;
+      shadows[1].textContent = dish.dish;
+      card.className = `dish-card${dish.id === 'kerak-telor' ? ' dish-card--kerak-telor' : ''}`;
+      const emoji = card.querySelector('.dish-card__emoji');
+      const photo = card.querySelector('.dish-card__photo');
+      const imagePath = dish.image || (city
+        ? `assets/Jawa/${city.assetFolder || city.name}/${dish.id}.png`
+        : '');
+      emoji.textContent = dish.emoji;
+      emoji.hidden = Boolean(imagePath);
+      photo.hidden = !imagePath;
+      photo.alt = dish.dish;
+      if (imagePath) photo.src = imagePath;
+      card.setAttribute('aria-label', `Mulai memasak ${dish.dish} di ${destinationName}`);
+      card.addEventListener('click', () => {
+        if (city && embedded) {
+          window.parent.postMessage({
+            type: 'start-recipe',
+            region: city.key,
+            dish: dish.id
+          }, window.location.origin);
+        } else if (city) {
+          const query = new URLSearchParams({ region: city.key, dish: dish.id });
+          window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+        } else if (embedded) {
+          window.parent.postMessage({ type: 'start-cooking', region: regionKey }, window.location.origin);
+        } else {
+          window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(regionKey)}`;
+        }
+      });
+    });
+    cardItems.slice(dishes.length).forEach(item => {
+      item.hidden = true;
+    });
+    document.getElementById('destinationDishes').dataset.cardCount = String(dishes.length);
+
+    closeButton.addEventListener('click', () => {
+      if (embedded) {
+        window.parent.postMessage({ type: 'close-destination' }, window.location.origin);
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>

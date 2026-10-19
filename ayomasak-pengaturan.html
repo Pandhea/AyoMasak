@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AyoMasak! – Pengaturan</title>
+  <meta name="description" content="AyoMasak! – pengaturan.">
+  <script>
+    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+      document.documentElement.classList.add('embedded');
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="page-settings">
+  <main>
+    <section class="dialog" role="dialog" aria-label="Pengaturan">
+      <div class="panel">
+
+        <h1 class="panel__logo">
+          <span class="panel__logo-icon" aria-hidden="true">⚙️</span>
+          <span>Pengaturan</span>
+        </h1>
+
+        <button class="close-button" type="button" aria-label="Tutup">
+          <span class="close-button__base"></span>
+          <span class="close-button__face">
+            <span class="close-button__label close-button__label--shadow" aria-hidden="true">X</span>
+            <span class="close-button__label" aria-hidden="true">X</span>
+          </span>
+        </button>
+
+        <button class="confirm-button" type="button" aria-label="Simpan pengaturan dan kembali">
+          <span class="confirm-button__well"></span>
+          <span class="confirm-button__face">
+            <span class="confirm-button__label confirm-button__label--shadow" aria-hidden="true">Okeeee!</span>
+            <span class="confirm-button__label">Okeeee!</span>
+          </span>
+        </button>
+
+        <div class="volume-settings" role="group" aria-label="Pengaturan volume">
+          <label class="volume-control" for="musicVolume">
+            <span class="volume-control__heading">
+              <span class="volume-control__icon" aria-hidden="true">♫</span>
+              <span>Musik</span>
+              <output class="volume-control__value" id="musicVolumeValue" for="musicVolume">28%</output>
+            </span>
+            <input class="volume-control__slider" id="musicVolume" type="range"
+                   min="0" max="100" value="28" aria-label="Volume musik">
+          </label>
+          <label class="volume-control" for="effectsVolume">
+            <span class="volume-control__heading">
+              <span class="volume-control__icon" aria-hidden="true">🔔</span>
+              <span>Efek suara</span>
+              <output class="volume-control__value" id="effectsVolumeValue" for="effectsVolume">70%</output>
+            </span>
+            <input class="volume-control__slider" id="effectsVolume" type="range"
+                   min="0" max="100" value="70" aria-label="Volume efek suara">
+          </label>
+        </div>
+
+      </div>
+    </section>
+  </main>
+  <script src="audio.js"></script>
+  <script>
+    const embedded = new URLSearchParams(window.location.search).get('embed') === '1';
+    const musicSlider = document.getElementById('musicVolume');
+    const effectsSlider = document.getElementById('effectsVolume');
+    const musicValue = document.getElementById('musicVolumeValue');
+    const effectsValue = document.getElementById('effectsVolumeValue');
+    const audioSettings = window.AyoAudio.getSettings();
+
+    function updateVolumeControl(slider, output, value) {
+      slider.value = String(value);
+      output.value = `${value}%`;
+      output.textContent = `${value}%`;
+    }
+
+    updateVolumeControl(musicSlider, musicValue, audioSettings.music);
+    updateVolumeControl(effectsSlider, effectsValue, audioSettings.effects);
+
+    function saveVolumeSettings() {
+      const settings = window.AyoAudio.setSettings({
+        music: Number(musicSlider.value),
+        effects: Number(effectsSlider.value)
+      });
+      updateVolumeControl(musicSlider, musicValue, settings.music);
+      updateVolumeControl(effectsSlider, effectsValue, settings.effects);
+    }
+
+    musicSlider.addEventListener('input', saveVolumeSettings);
+    effectsSlider.addEventListener('input', saveVolumeSettings);
+
+    const returnToHome = () => {
+      if (embedded) {
+        window.parent.postMessage({ type: 'close-home-panel' }, window.location.origin);
+      } else {
+        window.location.href = 'index.html';
+      }
+    };
+
+    window.addEventListener('keydown', event => {
+      if (embedded && event.key === 'Escape') returnToHome();
+    });
+
+    document.querySelector('.close-button').addEventListener('click', returnToHome);
+    document.querySelector('.confirm-button').addEventListener('click', returnToHome);
+  </script>
+</body>
+</html>

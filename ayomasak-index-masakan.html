@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AyoMasak! – Masakan</title>
+  <meta name="description" content="AyoMasak! – daftar masakan.">
+  <script src="audio.js"></script>
+  <script>
+    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+      document.documentElement.classList.add('embedded');
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="page-recipes">
+  <main>
+    <section class="dialog" role="dialog" aria-label="Masakan">
+      <div class="panel">
+
+        <h1 class="panel__logo">
+          <span class="panel__logo-icon" aria-hidden="true">🍳</span>
+          <span>Masakan</span>
+        </h1>
+
+        <button class="close-button" type="button" aria-label="Tutup">
+          <span class="close-button__base"></span>
+          <span class="close-button__face">
+            <span class="close-button__label close-button__label--shadow" aria-hidden="true">X</span>
+            <span class="close-button__label" aria-hidden="true">X</span>
+          </span>
+        </button>
+
+        <div class="index">
+          <div class="index__list" id="dishGroups" aria-label="Daftar masakan menurut daerah"></div>
+        </div>
+
+      </div>
+    </section>
+    <section class="dish-story" id="dishStory" hidden
+             role="dialog" aria-modal="true" aria-labelledby="dishStoryTitle">
+      <div class="dish-story__paper">
+        <button class="dish-story__close" id="dishStoryClose" type="button" aria-label="Tutup cerita masakan">×</button>
+        <span class="dish-story__eyebrow" id="dishStoryCity"></span>
+        <img class="dish-story__image" id="dishStoryImage" alt="" hidden>
+        <span class="dish-story__emoji" id="dishStoryEmoji" aria-hidden="true"></span>
+        <span class="dish-story__eyebrow">Cerita di balik hidangan</span>
+        <h2 class="dish-story__title" id="dishStoryTitle"></h2>
+        <p class="dish-story__text" id="dishStoryText"></p>
+      </div>
+    </section>
+  </main>
+  <script src="recipe-catalog.js"></script>
+  <script>
+    const embedded = new URLSearchParams(window.location.search).get('embed') === '1';
+    const dishGroups = document.getElementById('dishGroups');
+    const dishStory = document.getElementById('dishStory');
+    const dishStoryClose = document.getElementById('dishStoryClose');
+    let lastFocusedCard = null;
+
+    function openDishStory(region, dish) {
+      const image = document.getElementById('dishStoryImage');
+      const emoji = document.getElementById('dishStoryEmoji');
+      const imagePath = dish.image || `assets/Jawa/${region.assetFolder || region.city}/${dish.id}.png`;
+      document.getElementById('dishStoryCity').textContent = region.city;
+      document.getElementById('dishStoryTitle').textContent = dish.dish;
+      document.getElementById('dishStoryText').textContent = dish.story;
+      image.src = imagePath;
+      image.alt = dish.dish;
+      image.hidden = false;
+      emoji.textContent = dish.emoji;
+      emoji.hidden = true;
+      image.onerror = () => {
+        image.hidden = true;
+        emoji.hidden = false;
+      };
+      dishStory.hidden = false;
+      requestAnimationFrame(() => {
+        dishStory.classList.add('is-visible');
+        dishStoryClose.focus();
+      });
+    }
+
+    function closeDishStory() {
+      if (dishStory.hidden) return;
+      dishStory.classList.remove('is-visible');
+      dishStory.hidden = true;
+      lastFocusedCard?.focus();
+    }
+
+    window.AyoDishCatalog.cities.forEach((region, regionIndex) => {
+      const group = document.createElement('section');
+      group.className = 'dish-group';
+      const heading = document.createElement('h2');
+      heading.className = 'dish-group__title';
+      heading.id = `dish-region-${regionIndex}`;
+      heading.textContent = region.key === 'banten'
+        ? 'Banten, Serang'
+        : region.key === 'jakarta'
+          ? 'DKI Jakarta, Jakarta'
+          : region.key === 'bandung'
+            ? 'Jawa Barat, Bandung'
+            : region.key === 'semarang'
+              ? 'Jawa Tengah, Semarang'
+              : region.key === 'yogyakarta'
+                ? 'DI Yogyakarta, Yogyakarta'
+                : `Jawa Timur, ${region.city}`;
+      const list = document.createElement('ul');
+      list.className = 'dish-group__list';
+      list.setAttribute('aria-labelledby', heading.id);
+
+      region.dishes.forEach(dish => {
+        const item = document.createElement('li');
+        item.className = 'dish-card-item';
+        const card = document.createElement('button');
+        card.className = 'dish-card';
+        card.type = 'button';
+        card.dataset.dish = dish.id;
+        card.dataset.region = region.key;
+        card.setAttribute('aria-label', `Masak ${dish.dish}`);
+        card.innerHTML = `
+          <span class="dish-card__well"></span>
+          <span class="dish-card__face">
+            <span class="dish-card__icon">
+              <img class="dish-card__photo" src="${dish.image || `assets/Jawa/${region.assetFolder || region.city}/${dish.id}.png`}" alt="${dish.dish}">
+            </span>
+          </span>
+          <span class="dish-card__label dish-card__label--region dish-card__label--shadow" aria-hidden="true">${region.city}</span>
+          <span class="dish-card__label dish-card__label--name dish-card__label--shadow" aria-hidden="true">${dish.dish}</span>
+          <span class="dish-card__label dish-card__label--region">${region.city}</span>
+          <span class="dish-card__label dish-card__label--name">${dish.dish}</span>`;
+        item.appendChild(card);
+        list.appendChild(item);
+      });
+
+      group.append(heading, list);
+      dishGroups.appendChild(group);
+    });
+
+    document.querySelectorAll('.dish-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const region = window.AyoDishCatalog.cities.find(item => item.key === card.dataset.region);
+        const dish = region?.dishes.find(item => item.id === card.dataset.dish);
+        if (!region || !dish) throw new Error(`Resep "${card.dataset.dish}" tidak ditemukan.`);
+        lastFocusedCard = card;
+        openDishStory(region, dish);
+      });
+    });
+
+    dishStoryClose.addEventListener('click', closeDishStory);
+    dishStory.addEventListener('click', event => {
+      if (event.target === dishStory) closeDishStory();
+    });
+
+    document.querySelector('.close-button').addEventListener('click', () => {
+      if (embedded) {
+        window.parent.postMessage({ type: 'close-home-panel' }, window.location.origin);
+      } else {
+        window.location.href = 'index.html';
+      }
+    });
+
+    window.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !dishStory.hidden) {
+        closeDishStory();
+      } else if (embedded && event.key === 'Escape') {
+        window.parent.postMessage({ type: 'close-home-panel' }, window.location.origin);
+      }
+    });
+  </script>
+</body>
+</html>

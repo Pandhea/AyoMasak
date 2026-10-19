@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AyoMasak! – Dapur</title>
+  <meta name="description" content="AyoMasak! – seret bahan makanan ke dalam wajan dan masak pesanan kamu.">
+
+  <!--
+    ASSETS (export from Figma node 171:1834, save into ./assets/ next to this file):
+      assets/icon-beranda.png      <- https://www.figma.com/api/mcp/asset/cba98c74-a7f2-4d7a-b633-d263c8521f36.png
+      assets/icon-petunjuk.png     <- https://www.figma.com/api/mcp/asset/d46a8323-9474-488f-a781-d46621ed1d83.png
+      assets/bahan-makanan.png     <- https://www.figma.com/api/mcp/asset/7b12558b-7f40-4057-931d-43868356dfb2.png  (ingredient sprite, cropped per slot)
+      assets/kerak-telur.png       <- https://www.figma.com/api/mcp/asset/8c3b4d9f-5161-4d14-8a04-21639f68cc04.png
+      assets/koki.png              <- https://www.figma.com/api/mcp/asset/2d6d963c-05c5-4d86-85d2-c51ac144a47f.png
+    (temporary Figma URLs, valid ~7 days: curl -L -o <file> "<url>")
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="page-kitchen">
+  <main class="kitchen">
+
+    <section class="inventory" aria-label="Bahan makanan">
+      <div class="inventory__panel" aria-hidden="true"></div>
+      <div class="inventory__grid" id="ingredientGrid" aria-label="Rak bahan. Seret bahan ke dalam wajan, atau gunakan Enter untuk memilih."></div>
+    </section>
+
+    <div class="pan-stage" id="panDropZone" aria-label="Wajan, masukkan bahan yang dipilih">
+      <div class="pan-handle pan-handle--left" aria-hidden="true"></div>
+      <div class="pan-handle pan-handle--right" aria-hidden="true"></div>
+      <div class="pan-body">
+        <span class="pan-title" id="panTitle">Wajan</span>
+        <div class="pan-items" id="panItems" aria-live="polite"></div>
+      </div>
+      <div class="pan-lid" aria-hidden="true">
+        <span class="pan-lid__knob"></span>
+      </div>
+      <div class="pan-steam" aria-hidden="true">
+        <span class="pan-steam__puff"></span>
+        <span class="pan-steam__puff"></span>
+        <span class="pan-steam__puff"></span>
+      </div>
+    </div>
+
+    <button class="cook-button" type="button" id="cookButton">
+      <span class="cook-button__well"></span>
+      <span class="cook-button__face">
+        <span class="cook-button__label cook-button__label--shadow" aria-hidden="true">Masak!</span>
+        <span class="cook-button__label">Masak!</span>
+      </span>
+    </button>
+    <button class="cook-button continue-cooking-button" type="button" id="continueCookingButton" hidden>
+      <span class="cook-button__well"></span>
+      <span class="cook-button__face">
+        <span class="cook-button__label cook-button__label--shadow" aria-hidden="true">Lanjut</span>
+        <span class="cook-button__label">Lanjut</span>
+      </span>
+    </button>
+
+    <p class="instruction">
+      <span class="instruction__text instruction__text--shadow" aria-hidden="true">Seret bahan dari rak ke dalam wajan!</span>
+      <span class="instruction__text">Seret bahan dari rak ke dalam wajan!</span>
+    </p>
+    <p class="cook-feedback" id="cookFeedback" aria-live="polite">Seret bahan dari rak ke dalam wajan.</p>
+    <section class="story-scroll" id="storyScroll" hidden aria-labelledby="storyTitle">
+      <div class="story-scroll__roller" aria-hidden="true"></div>
+      <div class="story-scroll__paper" tabindex="0" role="region" aria-label="Cerita masakan, dapat digulir">
+        <div class="story-scroll__content">
+          <button class="story-scroll__close" id="storyCloseButton" type="button" aria-label="Tutup cerita masakan">
+            <span class="story-scroll__close-icon" aria-hidden="true">×</span>
+            <span>Tutup</span>
+          </button>
+          <div class="story-scroll__celebration" aria-label="Berhasil!">
+            <span class="story-scroll__confetti story-scroll__confetti--left" aria-hidden="true">🎉</span>
+            <strong class="story-scroll__success">Berhasil!</strong>
+            <span class="story-scroll__confetti story-scroll__confetti--right" aria-hidden="true">🎊</span>
+          </div>
+          <div class="story-scroll__dish-image" id="storyDishImage" role="img">
+            <img class="story-scroll__dish-photo" id="storyDishPhoto" alt="" hidden>
+            <span class="story-scroll__dish-placeholder" id="storyDishPlaceholder" aria-hidden="true"></span>
+          </div>
+          <span class="story-scroll__eyebrow">Cerita di balik hidangan</span>
+          <h2 class="story-scroll__title" id="storyTitle"></h2>
+          <p class="story-scroll__text" id="storyText"></p>
+        </div>
+      </div>
+    </section>
+    <section class="story-scroll recipe-hint" id="recipeHint" hidden
+             role="dialog" aria-modal="true" aria-labelledby="recipeHintTitle">
+      <div class="story-scroll__roller" aria-hidden="true"></div>
+      <div class="story-scroll__paper" tabindex="-1" role="document">
+        <div class="story-scroll__content">
+          <button class="story-scroll__close" id="recipeHintClose" type="button" aria-label="Tutup resep">
+            <span class="story-scroll__close-icon" aria-hidden="true">×</span>
+            <span>Tutup</span>
+          </button>
+          <span class="story-scroll__eyebrow">Panduan memasak</span>
+          <h2 class="story-scroll__title" id="recipeHintTitle"></h2>
+          <p class="recipe-hint__intro">Bahan yang diperlukan:</p>
+          <ul class="recipe-hint__list" id="recipeHintIngredients"></ul>
+        </div>
+      </div>
+    </section>
+    <aside class="stamp-reward" id="stampReward" hidden aria-live="polite">
+      <span class="stamp-reward__badge" id="stampRewardEmoji" aria-hidden="true"></span>
+      <img class="stamp-reward__image" id="stampRewardImage" alt="" hidden>
+      <div class="stamp-reward__copy">
+        <strong class="stamp-reward__title" id="stampRewardTitle"></strong>
+        <p class="stamp-reward__text" id="stampRewardText"></p>
+      </div>
+      <div class="stamp-reward__actions" id="stampRewardActions" hidden>
+        <button class="stamp-reward__action" id="nextCityButton" type="button">Lanjut ke kota berikutnya</button>
+        <button class="stamp-reward__action stamp-reward__action--secondary" id="mainMenuButton" type="button">Kembali ke menu utama</button>
+      </div>
+      <button class="stamp-reward__dismiss" id="stampRewardDismiss" type="button" aria-label="Tutup hadiah stempel">×</button>
+    </aside>
+
+    <header class="kitchen__header">
+      <button class="tile-button tile-button--home" type="button" id="kitchenHomeBtn" aria-label="Kembali ke peta">
+        <span class="button-art" aria-hidden="true">
+          <img class="button-art__face" src="assets/Buttons/button-home-face.png" alt="" draggable="false">
+          <img class="button-art__frame" src="assets/Buttons/button-home-frame.png" alt="" draggable="false">
+        </span>
+      </button>
+
+      <button class="tile-button tile-button--hint" id="recipeHintButton" type="button"
+              aria-label="Lihat resep masakan" aria-haspopup="dialog" aria-controls="recipeHint">
+        <span class="button-art" aria-hidden="true">
+          <img class="button-art__face" src="assets/Buttons/button-hint-face.png" alt="" draggable="false">
+          <img class="button-art__frame" src="assets/Buttons/button-hint-frame.png" alt="" draggable="false">
+        </span>
+      </button>
+
+      <section class="order" aria-label="Pesanan">
+        <div class="order__inner">
+          <span class="order__dish" id="dishIllustration" aria-hidden="true">
+            <img class="order__dish-photo" id="dishPhoto" alt="" hidden>
+            <span id="dishEmoji">🍳</span>
+          </span>
+          <span class="order__text order__text--title order__text--shadow" aria-hidden="true">Silahkan buat Makanan ini!</span>
+          <span class="order__text order__text--title">Silahkan buat Makanan ini!</span>
+          <span class="order__text order__text--name order__text--shadow" id="dishNameShadow" aria-hidden="true">Kerak Telur</span>
+          <span class="order__text order__text--name" id="dishName">Kerak Telur</span>
+        </div>
+      </section>
+    </header>
+
+    <div class="kitchen__divider" aria-hidden="true"></div>
+
+    <div class="chef">
+      <div class="chef__clip">
+        <span class="chef__emoji" role="img" aria-label="Koki">👩‍🍳</span>
+      </div>
+    </div>
+
+  </main>
+  <script src="audio.js"></script>
+  <script src="recipe-catalog.js"></script>
+  <script>
+    const recipes = {
+      jakarta: { name: 'Jakarta', dish: 'Kerak Telur', emoji: '🍳', image: 'assets/Jawa/Jakarta/kerak-telor.png', ingredients: ['Beras ketan', 'Telur', 'Kelapa', 'Bawang goreng'] },
+      bandung: { name: 'Bandung', dish: 'Mie Kocok', emoji: '🍜', ingredients: ['Mie', 'Kaldu', 'Daging', 'Bawang'] },
+      semarang: { name: 'Semarang', dish: 'Lumpia Semarang', emoji: '🥟', ingredients: ['Rebung', 'Kulit lumpia', 'Ayam', 'Minyak'] },
+      bali: { name: 'Bali', dish: 'Sate Lilit', emoji: '🍢', ingredients: ['Ikan', 'Kelapa', 'Bawang', 'Cabai'] },
+      padang: { name: 'Padang', dish: 'Rendang', emoji: '🍛', ingredients: ['Daging', 'Santan', 'Cabai', 'Daun kunyit'] },
+      makassar: { name: 'Makassar', dish: 'Coto Makassar', emoji: '🥣', ingredients: ['Daging', 'Kaldu', 'Kacang', 'Bawang'] }
+    };
+    const pantry = [
+      { name: 'Beras ketan', emoji: '🍚' },
+      { name: 'Telur', emoji: '🥚' },
+      { name: 'Kelapa', emoji: '🥥' },
+      { name: 'Bawang goreng', emoji: '🧅' },
+      { name: 'Kecap', emoji: '🍶' },
+      { name: 'Mie', emoji: '🍜' },
+      { name: 'Kaldu', emoji: '🥣' },
+      { name: 'Daging', emoji: '🥩' },
+      { name: 'Bawang', emoji: '🧅' },
+      { name: 'Rebung', emoji: '🎋' },
+      { name: 'Kulit lumpia', emoji: '🥟' },
+      { name: 'Ayam', emoji: '🍗' },
+      { name: 'Minyak', emoji: '🫒' },
+      { name: 'Ikan', emoji: '🐟' },
+      { name: 'Cabai', emoji: '🌶️' },
+      { name: 'Santan', emoji: '🥛' },
+      { name: 'Daun kunyit', emoji: '🌿' },
+      { name: 'Kacang', emoji: '🥜' },
+      { name: 'Bandeng', emoji: '🐟' },
+      { name: 'Nasi', emoji: '🍚' },
+      { name: 'Jahe', emoji: '🫚' },
+      { name: 'Sumsum sapi', emoji: '🥩' },
+      { name: 'Daging sapi', emoji: '🥩' },
+      { name: 'Daun pisang', emoji: '🍃' },
+      { name: 'Daun pandan', emoji: '🌿' },
+      { name: 'Daun salam', emoji: '🍃' },
+      { name: 'Tepung beras', emoji: '🌾' },
+      { name: 'Gula merah', emoji: '🟤' },
+      { name: 'Daun jati', emoji: '🍃' },
+      { name: 'Kerupuk', emoji: '🍘' },
+      { name: 'Kencur', emoji: '🫚' },
+      { name: 'Kol', emoji: '🥬' },
+      { name: 'Kacang tanah', emoji: '🥜' },
+      { name: 'Tauge', emoji: '🌱' },
+      { name: 'Timun', emoji: '🥒' },
+      { name: 'Belimbing wuluh', emoji: '🍈' },
+      { name: 'Tomat', emoji: '🍅' },
+      { name: 'Nangka muda', emoji: '🍈' },
+      { name: 'Garam', emoji: '🧂' },
+      { name: 'Daging kambing', emoji: '🍖' },
+      { name: 'Tepung terigu', emoji: '🌾' },
+      { name: 'Kacang hijau', emoji: '🫘' },
+      { name: 'Gula', emoji: '🍬' },
+      { name: 'Kluwek', emoji: '🫘' },
+      { name: 'Cingur', emoji: '🥩' },
+      { name: 'Petis', emoji: '🥣' },
+      { name: 'Sayuran', emoji: '🥬' },
+      { name: 'Lontong', emoji: '🍚' },
+      { name: 'Tahu', emoji: '🧈' },
+      { name: 'Tusuk besi', emoji: '🍢' },
+      { name: 'Bandeng', emoji: '🐟' },
+      { name: 'Jahe', emoji: '🫚' },
+      { name: 'Sumsum sapi', emoji: '🥩' },
+      { name: 'Daun pisang', emoji: '🍃' },
+      { name: 'Daun pandan', emoji: '🌿' },
+      { name: 'Daun salam', emoji: '🍃' },
+      { name: 'Tepung beras', emoji: '🌾' },
+      { name: 'Gula merah', emoji: '🟤' },
+      { name: 'Kerupuk', emoji: '🍘' },
+      { name: 'Kencur', emoji: '🫚' },
+      { name: 'Kol', emoji: '🥬' },
+      { name: 'Kacang tanah', emoji: '🥜' },
+      { name: 'Tauge', emoji: '🌱' },
+      { name: 'Timun', emoji: '🥒' },
+      { name: 'Belimbing wuluh', emoji: '🍈' },
+      { name: 'Tomat', emoji: '🍅' },
+      { name: 'Nangka muda', emoji: '🍈' },
+      { name: 'Garam', emoji: '🧂' },
+      { name: 'Daging kambing', emoji: '🍖' },
+      { name: 'Tepung terigu', emoji: '🌾' },
+      { name: 'Kacang hijau', emoji: '🫘' },
+      { name: 'Gula', emoji: '🍬' },
+      { name: 'Kluwek', emoji: '🫘' },
+      { name: 'Cingur', emoji: '🥩' },
+      { name: 'Petis', emoji: '🥣' },
+      { name: 'Sayuran', emoji: '🥬' },
+      { name: 'Lontong', emoji: '🍚' },
+      { name: 'Tahu', emoji: '🧈' },
+      { name: 'Tusuk besi', emoji: '🍢' }
+    ];
+    const selectedRegion = new URLSearchParams(window.location.search).get('region');
+    const selectedDish = new URLSearchParams(window.location.search).get('dish');
+    const regionalRecipe = recipes[selectedRegion] || recipes.jakarta;
+    const selectedCity = window.AyoDishCatalog.cities.find(city => city.key === selectedRegion);
+    const catalogDish = selectedCity?.dishes.find(dish => dish.id === selectedDish);
+    if (selectedDish && !catalogDish) {
+      throw new Error(`Resep "${selectedDish}" tidak ditemukan untuk daerah "${selectedRegion}".`);
+    }
+    const activeRegion = catalogDish ? selectedCity.key : recipes[selectedRegion] ? selectedRegion : 'jakarta';
+    const recipe = catalogDish
+      ? {
+          ...catalogDish,
+          image: catalogDish.image || `assets/Jawa/${selectedCity.assetFolder || selectedCity.city}/${catalogDish.id}.png`,
+          ingredientImages: Object.fromEntries(
+            (catalogDish.illustratedIngredients || []).map((name, index) => [
+              name,
+              `assets/Jawa/Bahan Utama/${catalogDish.id}-${index + 1}.png`
+            ])
+          ),
+          name: selectedCity.name,
+          city: selectedCity.city
+        }
+      : regionalRecipe;
+    const cookingSequence = [
+      { region: 'jakarta', dish: 'kerak-telor' },
+      { region: 'jakarta', dish: 'soto-betawi' },
+      { region: 'bandung' },
+      { region: 'semarang' },
+      { region: 'bali' },
+      { region: 'padang' },
+      { region: 'makassar' }
+    ];
+    const backstories = {
+      'Kerak Telur': 'Kerak telor dikenal sebagai jajanan khas Betawi. Adonan ketan dan telur dimasak di atas arang, lalu wajan dibalik agar permukaannya matang dan berkerak. Taburan kelapa sangrai dan bawang goreng melengkapi rasanya.',
+      'Soto Betawi': 'Soto Betawi adalah soto khas Jakarta dengan kuah gurih yang biasanya memadukan santan atau susu dan kaldu. Sebutan “Soto Betawi” mulai dikenal luas pada abad ke-20 dan kini menjadi salah satu ikon kuliner ibu kota.',
+      'Mie Kocok': 'Mie kocok menjadi salah satu sajian khas Bandung. Namanya merujuk pada cara mie diayun atau “dikocok” dalam air panas sebelum disajikan bersama kuah kaldu sapi, kikil, dan pelengkap lainnya.',
+      'Lumpia Semarang': 'Lumpia Semarang tumbuh dari perjumpaan tradisi kuliner Tionghoa dan Jawa. Isian rebung yang gurih dibungkus kulit tipis, lalu dapat disajikan basah atau digoreng hingga renyah.',
+      'Sate Lilit': 'Sate lilit adalah sajian Bali dengan daging atau ikan berbumbu yang dililitkan pada tusuk sate. Berbeda dari sate potong, adonannya menyatu dengan bumbu dan sering diperkaya kelapa parut.',
+      'Rendang': 'Rendang berasal dari tradisi masyarakat Minangkabau dan kerap hadir dalam perayaan serta jamuan penting. Daging dimasak perlahan bersama santan dan rempah sampai bumbunya meresap dan mengering.',
+      'Coto Makassar': 'Coto Makassar merupakan hidangan berkuah khas Sulawesi Selatan. Daging dan jeroan dimasak dengan racikan rempah, lalu kuahnya disajikan hangat; coto sering dinikmati bersama burasa atau ketupat.'
+    };
+    const selectedIngredients = new Set();
+    const ingredientGrid = document.getElementById('ingredientGrid');
+    const panStage = document.getElementById('panDropZone');
+    const panBody = panStage.querySelector('.pan-body');
+    const panItems = document.getElementById('panItems');
+    const cookFeedback = document.getElementById('cookFeedback');
+    const cookButton = document.getElementById('cookButton');
+    const storyScroll = document.getElementById('storyScroll');
+    const storyPaper = storyScroll.querySelector('.story-scroll__paper');
+    const recipeHint = document.getElementById('recipeHint');
+    const recipeHintPaper = recipeHint.querySelector('.story-scroll__paper');
+    const recipeHintButton = document.getElementById('recipeHintButton');
+    const recipeHintCloseButton = document.getElementById('recipeHintClose');
+    const recipeHintIngredients = document.getElementById('recipeHintIngredients');
+    const stampReward = document.getElementById('stampReward');
+    const continueButton = document.getElementById('continueCookingButton');
+    let storyCloseTimer = null;
+    let recipeHintCloseTimer = null;
+    let activeDrag = null;
+    let isCooked = false;
+    let isCooking = false;
+    let isBurnt = false;
+    let cookingTimer = null;
+
+    document.getElementById('dishName').textContent = recipe.dish;
+    document.getElementById('dishNameShadow').textContent = recipe.dish;
+    const dishPhoto = document.getElementById('dishPhoto');
+    const dishEmoji = document.getElementById('dishEmoji');
+    dishEmoji.textContent = recipe.emoji;
+    if (recipe.image) {
+      dishPhoto.src = recipe.image;
+      dishPhoto.alt = recipe.dish;
+      dishPhoto.hidden = false;
+      dishEmoji.hidden = true;
+    }
+    document.querySelector('.order__text--title:not(.order__text--shadow)').textContent =
+      `Silakan buat makanan ${recipe.name}!`;
+    document.querySelector('.order__text--title.order__text--shadow').textContent =
+      `Silakan buat makanan ${recipe.name}!`;
+
+    const availableIngredients = [
+      ...recipe.ingredients.map(name => {
+        const ingredient = pantry.find(item => item.name === name);
+        if (!ingredient) {
+          throw new Error(`Bahan "${name}" untuk resep ${recipe.dish} tidak ditemukan di pantry.`);
+        }
+        return { ...ingredient, image: recipe.ingredientImages?.[name] };
+      }),
+      ...pantry.filter(item => !recipe.ingredients.includes(item.name))
+    ].slice(0, 15);
+
+    function createIngredientVisual(ingredient, className) {
+      if (ingredient.image) {
+        const image = document.createElement('img');
+        image.className = className;
+        image.src = ingredient.image;
+        image.alt = '';
+        image.setAttribute('aria-hidden', 'true');
+        image.draggable = false;
+        return image;
+      }
+      const emoji = document.createElement('span');
+      emoji.className = className;
+      emoji.textContent = ingredient.emoji;
+      emoji.setAttribute('aria-hidden', 'true');
+      return emoji;
+    }
+
+    function renderPan() {
+      panItems.replaceChildren();
+      if (isBurnt) {
+        for (let index = 0; index < 6; index += 1) {
+          const charredPiece = document.createElement('span');
+          charredPiece.className = 'pan-char';
+          charredPiece.setAttribute('aria-hidden', 'true');
+          panItems.appendChild(charredPiece);
+        }
+        return;
+      }
+      if (isCooked) {
+        const finishedDish = document.createElement('span');
+        finishedDish.className = 'pan-result';
+        finishedDish.textContent = recipe.emoji;
+        finishedDish.setAttribute('aria-label', recipe.dish);
+        panItems.appendChild(finishedDish);
+        return;
+      }
+      selectedIngredients.forEach(name => {
+        const ingredient = availableIngredients.find(item => item.name === name);
+        if (!ingredient) return;
+        const item = document.createElement('span');
+        item.className = 'pan-item';
+        item.appendChild(createIngredientVisual(ingredient, 'pan-item__art'));
+        item.setAttribute('aria-label', name);
+        panItems.appendChild(item);
+      });
+      panStage.classList.toggle('has-items', selectedIngredients.size > 0);
+      panStage.classList.remove('is-burnt', 'is-ready');
+    }
+
+    function toggleIngredient(name) {
+      if (isCooking || isCooked || isBurnt) return;
+      if (selectedIngredients.has(name)) {
+        selectedIngredients.delete(name);
+        window.AyoAudio.playTone(300, 75, 0.025);
+      } else {
+        selectedIngredients.add(name);
+        window.AyoAudio.playTone(460, 85, 0.025);
+      }
+      const button = ingredientGrid.querySelector(`[data-ingredient="${CSS.escape(name)}"]`);
+      if (button) {
+        button.classList.toggle('selected', selectedIngredients.has(name));
+        button.setAttribute('aria-pressed', String(selectedIngredients.has(name)));
+      }
+      renderPan();
+      cookFeedback.textContent = selectedIngredients.size
+        ? `${selectedIngredients.size} bahan ada di wajan.`
+        : 'Seret bahan dari rak ke dalam wajan.';
+    }
+
+    function isOverPan(clientX, clientY) {
+      const bounds = panBody.getBoundingClientRect();
+      const normalizedX = (clientX - (bounds.left + bounds.width / 2)) / (bounds.width / 2);
+      const normalizedY = (clientY - (bounds.top + bounds.height / 2)) / (bounds.height / 2);
+      return normalizedX ** 2 + normalizedY ** 2 <= 1;
+    }
+
+    function moveDragGhost(clientX, clientY) {
+      if (!activeDrag) return;
+      activeDrag.ghost.style.left = `${clientX}px`;
+      activeDrag.ghost.style.top = `${clientY}px`;
+      const overPan = isOverPan(clientX, clientY);
+      panBody.classList.toggle('is-drop-target', overPan);
+    }
+
+    function finishIngredientDrag(event, dropped) {
+      if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+      const { button, name, ghost } = activeDrag;
+      const overPan = dropped && isOverPan(event.clientX, event.clientY);
+      if (button.hasPointerCapture(event.pointerId)) {
+        button.releasePointerCapture(event.pointerId);
+      }
+      button.classList.remove('is-dragging');
+      ghost.remove();
+      panBody.classList.remove('is-drop-target');
+      activeDrag = null;
+
+      if (overPan) {
+        if (selectedIngredients.has(name)) {
+          cookFeedback.textContent = `${name} sudah ada di wajan.`;
+        } else {
+          toggleIngredient(name);
+          cookFeedback.textContent = `${name} masuk ke wajan.`;
+        }
+      } else if (dropped) {
+        cookFeedback.textContent = 'Lepaskan bahan di bagian dalam wajan untuk memasukkannya.';
+      } else {
+        cookFeedback.textContent = 'Seret bahan dari rak ke dalam wajan.';
+      }
+    }
+
+    availableIngredients.forEach(ingredient => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'slot';
+      button.draggable = false;
+      button.dataset.ingredient = ingredient.name;
+      button.setAttribute('aria-label', ingredient.name);
+      button.setAttribute('aria-pressed', 'false');
+      const visual = createIngredientVisual(
+        ingredient,
+        ingredient.image ? 'slot__image' : 'slot__emoji'
+      );
+      const label = document.createElement('span');
+      label.className = 'slot__label';
+      label.textContent = ingredient.name;
+      const check = document.createElement('span');
+      check.className = 'slot__check';
+      check.textContent = '✓';
+      check.setAttribute('aria-hidden', 'true');
+      button.append(visual, label, check);
+      button.addEventListener('click', event => {
+        if (event.detail === 0) toggleIngredient(ingredient.name);
+      });
+      button.addEventListener('pointerdown', event => {
+        if (isCooking || isCooked || isBurnt || event.button !== 0 || activeDrag) return;
+        event.preventDefault();
+        const ghost = document.createElement('span');
+        ghost.className = 'drag-ghost';
+        ghost.setAttribute('aria-hidden', 'true');
+        ghost.appendChild(createIngredientVisual(ingredient, 'drag-ghost__icon'));
+        document.body.appendChild(ghost);
+        activeDrag = { button, name: ingredient.name, pointerId: event.pointerId, ghost };
+        button.classList.add('is-dragging');
+        button.setPointerCapture(event.pointerId);
+        moveDragGhost(event.clientX, event.clientY);
+        cookFeedback.textContent = `Seret ${ingredient.name} ke dalam wajan.`;
+      });
+      ingredientGrid.appendChild(button);
+    });
+
+    document.addEventListener('pointermove', event => {
+      if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
+      moveDragGhost(event.clientX, event.clientY);
+    });
+    document.addEventListener('pointerup', event => finishIngredientDrag(event, true));
+    document.addEventListener('pointercancel', event => finishIngredientDrag(event, false));
+
+    function showCookingStampReward() {
+      if (!catalogDish || !selectedCity) return;
+      const storageKey = 'ayoMasakProgress';
+      const savedProgress = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+      const cookingStamps = Array.isArray(savedProgress.cookingStamps)
+        ? savedProgress.cookingStamps
+        : [];
+      const completedDishesByCity = savedProgress.completedDishesByCity &&
+        typeof savedProgress.completedDishesByCity === 'object'
+        ? { ...savedProgress.completedDishesByCity }
+        : {};
+      const previousCompletedDishes = Array.isArray(completedDishesByCity[activeRegion])
+        ? [...completedDishesByCity[activeRegion]]
+        : [];
+      const wasCityComplete = selectedCity.dishes.every(dish => previousCompletedDishes.includes(dish.id));
+      const completedDishes = previousCompletedDishes;
+      if (!completedDishes.includes(catalogDish.id)) completedDishes.push(catalogDish.id);
+      completedDishesByCity[activeRegion] = completedDishes;
+
+      const totalDishes = selectedCity.dishes.length;
+      const completedCount = selectedCity.dishes.filter(dish => completedDishes.includes(dish.id)).length;
+      const cityComplete = completedCount === totalDishes;
+      const isNewStamp = cityComplete && !wasCityComplete;
+      if (cityComplete && !cookingStamps.includes(activeRegion)) cookingStamps.push(activeRegion);
+
+      localStorage.setItem(storageKey, JSON.stringify({
+        ...savedProgress,
+        completedDishesByCity,
+        cookingStamps
+      }));
+
+      const rewardEmoji = document.getElementById('stampRewardEmoji');
+      const rewardImage = document.getElementById('stampRewardImage');
+      rewardEmoji.textContent = recipe.emoji;
+      rewardEmoji.hidden = cityComplete;
+      rewardImage.hidden = !cityComplete;
+      if (cityComplete) {
+        rewardImage.src = selectedCity.stamp;
+        rewardImage.alt = `Stempel Kota ${selectedCity.name}`;
+      }
+
+      const title = document.getElementById('stampRewardTitle');
+      const message = document.getElementById('stampRewardText');
+      if (isNewStamp) {
+        title.textContent = `Stempel ${selectedCity.name} didapat!`;
+        message.textContent = `Semua ${totalDishes} masakan di ${selectedCity.city} selesai. Stempelmu tersimpan di Buku Stempel.`;
+      } else if (cityComplete) {
+        title.textContent = `Stempel ${selectedCity.name} sudah dikoleksi`;
+        message.textContent = `Semua masakan di ${selectedCity.city} sudah selesai. Lihat koleksimu di Buku Stempel pada beranda.`;
+      } else {
+        title.textContent = `${completedCount}/${totalDishes} masakan selesai`;
+        message.textContent = `Selesaikan ${totalDishes - completedCount} masakan lagi di ${selectedCity.city} untuk mendapatkan stempel.`;
+      }
+      stampReward.hidden = false;
+      const rewardActions = document.getElementById('stampRewardActions');
+      rewardActions.hidden = !cityComplete;
+      stampReward.classList.toggle('has-actions', cityComplete);
+      document.getElementById('stampRewardDismiss').hidden = cityComplete;
+      requestAnimationFrame(() => stampReward.classList.add('is-visible'));
+      return cityComplete;
+    }
+
+    function finishStoryClose() {
+      if (!storyScroll.classList.contains('is-closing')) return;
+      window.clearTimeout(storyCloseTimer);
+      storyScroll.hidden = true;
+      storyScroll.classList.remove('is-closing');
+      const cityComplete = showCookingStampReward();
+      cookButton.hidden = true;
+      continueButton.hidden = cityComplete;
+      if (cityComplete) {
+        document.getElementById('nextCityButton').focus();
+      } else {
+        continueButton.focus();
+      }
+    }
+
+    function renderRecipeHint() {
+      document.getElementById('recipeHintTitle').textContent = recipe.dish;
+      recipeHintIngredients.replaceChildren();
+      recipe.ingredients.forEach(name => {
+        const pantryIngredient = availableIngredients.find(item => item.name === name);
+        if (!pantryIngredient) {
+          throw new Error(`Bahan "${name}" untuk resep ${recipe.dish} tidak ditemukan di pantry.`);
+        }
+        const item = document.createElement('li');
+        item.className = 'recipe-hint__ingredient';
+        if (selectedIngredients.has(name)) item.classList.add('is-selected');
+
+        const visual = createIngredientVisual(
+          pantryIngredient,
+          pantryIngredient.image ? 'recipe-hint__image' : 'recipe-hint__emoji'
+        );
+
+        const label = document.createElement('span');
+        label.className = 'recipe-hint__name';
+        label.textContent = name;
+
+        const status = document.createElement('span');
+        status.className = 'recipe-hint__status';
+        status.textContent = selectedIngredients.has(name) ? 'Sudah di wajan' : 'Belum dimasukkan';
+
+        item.append(visual, label, status);
+        recipeHintIngredients.appendChild(item);
+      });
+    }
+
+    function finishRecipeHintClose() {
+      if (!recipeHint.classList.contains('is-closing')) return;
+      window.clearTimeout(recipeHintCloseTimer);
+      recipeHint.hidden = true;
+      recipeHint.classList.remove('is-closing');
+      recipeHintButton.focus();
+    }
+
+    function closeRecipeHint() {
+      if (recipeHint.hidden || recipeHint.classList.contains('is-closing')) return;
+      recipeHint.classList.remove('is-open');
+      recipeHint.classList.add('is-closing');
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        finishRecipeHintClose();
+        return;
+      }
+      recipeHintCloseTimer = window.setTimeout(finishRecipeHintClose, 900);
+    }
+
+    recipeHintButton.addEventListener('click', () => {
+      if (!recipeHint.hidden) return;
+      renderRecipeHint();
+      recipeHint.hidden = false;
+      requestAnimationFrame(() => {
+        recipeHint.classList.add('is-open');
+        recipeHintCloseButton.focus();
+        recipeHintPaper.scrollTop = 0;
+      });
+    });
+    recipeHintCloseButton.addEventListener('click', closeRecipeHint);
+    recipeHintPaper.addEventListener('transitionend', event => {
+      if (event.target === recipeHintPaper && event.propertyName === 'transform') {
+        finishRecipeHintClose();
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (recipeHint.hidden) return;
+      if (event.key === 'Escape') {
+        closeRecipeHint();
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        recipeHintCloseButton.focus();
+      }
+    });
+
+    document.getElementById('storyCloseButton').addEventListener('click', () => {
+      if (storyScroll.hidden || storyScroll.classList.contains('is-closing')) return;
+      storyScroll.classList.remove('is-open');
+      storyScroll.classList.add('is-closing');
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        finishStoryClose();
+        return;
+      }
+
+      storyCloseTimer = window.setTimeout(finishStoryClose, 900);
+    });
+
+    storyPaper.addEventListener('transitionend', event => {
+      if (event.target === storyPaper && event.propertyName === 'transform') {
+        finishStoryClose();
+      }
+    });
+
+    document.getElementById('stampRewardDismiss').addEventListener('click', () => {
+      stampReward.classList.remove('is-visible');
+      stampReward.hidden = true;
+    });
+
+    function setIngredientControlsDisabled(disabled) {
+      ingredientGrid.querySelectorAll('.slot').forEach(button => {
+        button.disabled = disabled;
+      });
+    }
+
+    function setCookButtonLabel(label) {
+      cookButton.querySelectorAll('.cook-button__label').forEach(buttonLabel => {
+        buttonLabel.textContent = label;
+      });
+      cookButton.setAttribute('aria-label', label);
+    }
+
+    function showSuccessfulCook() {
+      isCooked = true;
+      panStage.classList.add('is-ready');
+      renderPan();
+      window.AyoAudio.playTone(740, 180, 0.035);
+      cookFeedback.textContent = `Matang! ${recipe.dish} siap disajikan.`;
+      document.getElementById('storyTitle').textContent = recipe.dish;
+      document.getElementById('storyText').textContent = recipe.story || backstories[recipe.dish] || '';
+      document.getElementById('storyDishImage').setAttribute('aria-label', `Ilustrasi ${recipe.dish}`);
+      const storyDishPhoto = document.getElementById('storyDishPhoto');
+      const storyDishPlaceholder = document.getElementById('storyDishPlaceholder');
+      storyDishPlaceholder.textContent = recipe.emoji;
+      if (recipe.image) {
+        storyDishPhoto.src = recipe.image;
+        storyDishPhoto.alt = recipe.dish;
+        storyDishPhoto.hidden = false;
+        storyDishPlaceholder.hidden = true;
+      } else {
+        storyDishPhoto.hidden = true;
+        storyDishPlaceholder.hidden = false;
+      }
+      storyScroll.hidden = false;
+      requestAnimationFrame(() => storyScroll.classList.add('is-open'));
+      setCookButtonLabel('Matang!');
+      cookButton.hidden = true;
+    }
+
+    function restartCooking() {
+      if (isCooking || !isBurnt) return;
+      isBurnt = false;
+      selectedIngredients.clear();
+      panStage.classList.remove('is-burnt', 'is-ready', 'has-items');
+      ingredientGrid.querySelectorAll('.slot').forEach(button => {
+        button.disabled = false;
+        button.classList.remove('selected');
+        button.setAttribute('aria-pressed', 'false');
+      });
+      renderPan();
+      setCookButtonLabel('Masak!');
+      cookFeedback.textContent = 'Masakan gosong. Pilih bahan lagi, lalu coba masak ulang.';
+    }
+
+    cookButton.addEventListener('click', () => {
+      if (isBurnt) {
+        restartCooking();
+        return;
+      }
+      if (isCooking || isCooked) return;
+
+      if (selectedIngredients.size === 0) {
+        cookFeedback.textContent = 'Masukkan bahan ke dalam wajan sebelum mulai memasak.';
+        return;
+      }
+
+      const correct = recipe.ingredients.every(name => selectedIngredients.has(name)) &&
+        [...selectedIngredients].every(name => recipe.ingredients.includes(name));
+      isCooking = true;
+      panStage.classList.add('is-cooking');
+      cookButton.disabled = true;
+      setIngredientControlsDisabled(true);
+      setCookButtonLabel('Memasak...');
+      cookFeedback.textContent = 'Wajan tertutup. Sedang memasak, tunggu 3 detik...';
+      window.AyoAudio.playTone(520, 120, 0.025);
+
+      cookingTimer = window.setTimeout(() => {
+        cookingTimer = null;
+        isCooking = false;
+        panStage.classList.remove('is-cooking');
+
+        if (correct) {
+          cookButton.disabled = true;
+          showSuccessfulCook();
+          return;
+        }
+
+        isBurnt = true;
+        panStage.classList.add('is-burnt');
+        renderPan();
+        cookButton.disabled = false;
+        setCookButtonLabel('Mulai Ulang');
+        cookFeedback.textContent = 'Gosong! Bahan atau takarannya kurang tepat. Tekan Mulai Ulang untuk mencoba lagi.';
+        window.AyoAudio.playTone(180, 220, 0.035);
+      }, 3000);
+    });
+
+    continueButton.addEventListener('click', () => {
+      if (!isCooked || !storyScroll.hidden) return;
+      if (catalogDish && selectedCity) {
+        const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
+        const completedDishes = Array.isArray(savedProgress.completedDishesByCity?.[selectedCity.key])
+          ? savedProgress.completedDishesByCity[selectedCity.key]
+          : [];
+        const nextDish = selectedCity.dishes.find(dish => !completedDishes.includes(dish.id));
+        if (!nextDish) {
+          window.location.href = 'ayomasak-index-masakan.html';
+          return;
+        }
+        const query = new URLSearchParams({ region: selectedCity.key, dish: nextDish.id });
+        window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+        return;
+      }
+
+      const currentIndex = cookingSequence.findIndex(item =>
+        item.region === activeRegion &&
+        (item.dish ? item.dish === (selectedDish || 'kerak-telor') : !selectedDish)
+      );
+      const next = cookingSequence[currentIndex + 1];
+      if (!next) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const query = new URLSearchParams({ region: next.region });
+      if (next.dish) query.set('dish', next.dish);
+      window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+    });
+
+    document.getElementById('nextCityButton').addEventListener('click', () => {
+      if (!catalogDish || !selectedCity) return;
+      const cities = window.AyoDishCatalog.cities;
+      const cityIndex = cities.findIndex(city => city.key === selectedCity.key);
+      const nextCity = cities[(cityIndex + 1) % cities.length];
+      const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
+      const completedDishes = Array.isArray(savedProgress.completedDishesByCity?.[nextCity.key])
+        ? savedProgress.completedDishesByCity[nextCity.key]
+        : [];
+      const nextDish = nextCity.dishes.find(dish => !completedDishes.includes(dish.id)) || nextCity.dishes[0];
+      const query = new URLSearchParams({ region: nextCity.key, dish: nextDish.id });
+      window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+    });
+
+    document.getElementById('mainMenuButton').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('kitchenHomeBtn').addEventListener('click', () => {
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
