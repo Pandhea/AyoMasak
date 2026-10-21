@@ -7,7 +7,12 @@
     return;
   }
 
+  const minimumDisplayTime = 3000;
+  const idleStartScreen = document.getElementById('idleStartScreen');
+  let loadingStartedAt;
+
   async function finishLoading() {
+    loadingStartedAt = performance.now();
     const images = [...document.images].filter(image =>
       image.getAttribute('src') || image.getAttribute('srcset') || image.currentSrc
     );
@@ -36,6 +41,11 @@
       document.fonts.ready
     ]);
 
+    const remainingDisplayTime = minimumDisplayTime - (performance.now() - loadingStartedAt);
+    if (remainingDisplayTime > 0) {
+      await new Promise(resolve => window.setTimeout(resolve, remainingDisplayTime));
+    }
+
     loadingScreen.classList.add('is-hidden');
     loadingScreen.setAttribute('aria-hidden', 'true');
     await new Promise(resolve => {
@@ -49,9 +59,21 @@
     loadingScreen.remove();
   }
 
-  if (document.readyState === 'complete') {
+  function startLoading() {
+    if (idleStartScreen) {
+      idleStartScreen.classList.add('is-hidden');
+      idleStartScreen.setAttribute('aria-hidden', 'true');
+      loadingScreen.classList.remove('is-waiting');
+    }
+
     finishLoading();
+  }
+
+  if (idleStartScreen) {
+    document.getElementById('idleStartButton').addEventListener('click', startLoading, { once: true });
+  } else if (document.readyState === 'complete') {
+    startLoading();
   } else {
-    window.addEventListener('load', finishLoading, { once: true });
+    window.addEventListener('load', startLoading, { once: true });
   }
 })();

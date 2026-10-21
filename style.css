@@ -18,6 +18,12 @@
   transition: opacity .38s ease, visibility .38s ease;
 }
 
+.game-loading-screen.is-waiting{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .game-loading-screen::before,
 .game-loading-screen::after{
   position: absolute;
@@ -138,7 +144,198 @@
   pointer-events: none;
 }
 
+.idle-start-screen{
+  position: fixed;
+  z-index: 20001;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 14%, rgba(255,236,160,.55), transparent 38%),
+    linear-gradient(180deg, #43b7cd 0%, #76c8c6 38%, #e5a04f 72%, #b94e1d 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .38s ease, visibility .38s ease;
+}
+
+.idle-start-screen::before,
+.idle-start-screen::after{
+  position: absolute;
+  z-index: 0;
+  width: min(76vw, 360px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255,245,208,.18);
+  border-radius: 43% 57% 58% 42% / 48% 40% 60% 52%;
+  content: "";
+  pointer-events: none;
+}
+
+.idle-start-screen::before{
+  top: -34vw;
+  left: -28vw;
+  box-shadow: 0 0 0 18px rgba(255,245,208,.06), 0 0 0 42px rgba(255,245,208,.04);
+}
+
+.idle-start-screen::after{
+  right: -34vw;
+  bottom: -40vw;
+  border-color: rgba(255,235,187,.22);
+  box-shadow: 0 0 0 18px rgba(255,235,187,.07), 0 0 0 42px rgba(255,235,187,.04);
+}
+
+.idle-start-screen.is-hidden{
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.idle-start-card{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 360px);
+  padding: 24px 24px 28px;
+  border: 5px solid #78320f;
+  border-radius: 30px;
+  background: linear-gradient(155deg, #ffe5a0 0%, #ffc266 56%, #e98437 100%);
+  box-shadow:
+    inset 0 0 0 3px rgba(255,242,194,.7),
+    inset 0 -9px 0 rgba(137,53,13,.18),
+    0 10px 0 #54240f,
+    0 20px 30px rgba(62,37,23,.28);
+}
+
+.idle-start-logo{
+  display: block;
+  width: min(68vw, 230px);
+  height: min(68vw, 230px);
+  object-fit: contain;
+  filter: drop-shadow(0 7px 5px rgba(91,40,16,.2));
+  animation: game-loading-bob 2.1s ease-in-out infinite;
+}
+
+.idle-start-tagline{
+  margin: 4px 0 20px;
+  color: #78320f;
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-size: clamp(1rem, 4vw, 1.2rem);
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(255,245,213,.75);
+}
+
+body.page-home .idle-start-button{
+  min-width: 190px;
+  padding: 12px 30px;
+  border: 3px solid #397b35;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #9be16d 0%, #56b44e 100%);
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.38), 0 7px 0 #347b35, 0 10px 14px rgba(76,50,21,.2);
+  color: #fff;
+  font-family: "Fredoka", system-ui, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  text-shadow: 0 2px 0 rgba(43,99,39,.48);
+  transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+}
+
+body.page-home .idle-start-button:hover,
+body.page-home .idle-start-button:focus-visible{
+  filter: brightness(1.06);
+  transform: translateY(-2px);
+}
+
+body.page-home .idle-start-button:active{
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.3), 0 3px 0 #347b35;
+  transform: translateY(4px);
+}
+
+.idle-start-settings{
+  position: absolute;
+  z-index: 1;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: transform .16s ease;
+}
+
+body.page-home .destination-sheet{
+  z-index: 20002;
+}
+
+body.page-home .idle-start-screen:not(.is-hidden) ~ .app .destination-sheet{
+  position: fixed;
+  inset: 0;
+}
+
+.idle-start-settings .button-art{
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.idle-start-settings img{
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.idle-start-settings .button-art__face{
+  transform: translateY(0);
+  transition: transform .16s ease, filter .16s ease;
+}
+
+.idle-start-settings:hover .button-art__face,
+.idle-start-settings:focus-visible .button-art__face{
+  transform: translateY(3px);
+  filter: brightness(1.06);
+}
+
+.idle-start-settings:active .button-art__face{
+  transform: translateY(8px);
+  filter: brightness(.96);
+}
+
+.idle-start-spark{
+  position: absolute;
+  color: #fff5bd;
+  font-size: 30px;
+  text-shadow: 0 2px 0 #e98c37, 0 3px 6px rgba(100,45,12,.25);
+  animation: game-loading-twinkle 1.4s ease-in-out infinite alternate;
+}
+
+.idle-start-spark--left{
+  top: 29%;
+  left: 9%;
+}
+
+.idle-start-spark--right{
+  top: 17%;
+  right: 8%;
+  font-size: 22px;
+  animation-delay: .5s;
+}
+
 .embedded .game-loading-screen{
+  display: none;
+}
+
+.embedded .idle-start-screen{
   display: none;
 }
 
@@ -161,7 +358,11 @@
   .game-loading-screen,
   .game-loading-logo,
   .game-loading-track span,
-  .game-loading-spark{
+  .game-loading-spark,
+  .idle-start-screen,
+  .idle-start-logo,
+  .idle-start-spark,
+  .idle-start-button{
     animation: none;
     transition: none;
   }

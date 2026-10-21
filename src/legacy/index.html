@@ -13,7 +13,7 @@
 </head>
 
 <body class="page-home">
-  <div class="game-loading-screen" id="gameLoadingScreen" role="status" aria-live="polite">
+  <div class="game-loading-screen is-waiting" id="gameLoadingScreen" role="status" aria-live="polite">
     <div class="game-loading-card">
       <span class="game-loading-spark game-loading-spark--left" aria-hidden="true">✦</span>
       <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
@@ -23,6 +23,21 @@
       <div class="game-loading-track" aria-hidden="true"><span></span></div>
     </div>
   </div>
+  <section class="idle-start-screen" id="idleStartScreen" aria-label="Mulai AyoMasak">
+    <button class="idle-start-settings" type="button" aria-label="Pengaturan">
+      <span class="button-art" aria-hidden="true">
+        <img class="button-art__face" src="assets/Buttons/button-settings-face.png" alt="" draggable="false">
+        <img class="button-art__frame" src="assets/Buttons/button-settings-frame.png" alt="" draggable="false">
+      </span>
+    </button>
+    <div class="idle-start-card">
+      <span class="idle-start-spark idle-start-spark--left" aria-hidden="true">✦</span>
+      <img class="idle-start-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!">
+      <span class="idle-start-spark idle-start-spark--right" aria-hidden="true">✦</span>
+      <p class="idle-start-tagline">Petualangan rasa Nusantara</p>
+      <button class="idle-start-button" id="idleStartButton" type="button">Mulai</button>
+    </div>
+  </section>
   <div class="app">
     <section class="screen map-screen active" id="mapScreen">
       <div class="map-stage" id="mapStage" aria-label="Peta interaktif, geser untuk menjelajahi">
@@ -893,6 +908,11 @@
     });
 
     document.querySelector('.settings-btn').addEventListener('click', () => {
+      playTone(520, 100, 0.03);
+      openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
+    });
+
+    document.querySelector('.idle-start-settings').addEventListener('click', () => {
       playTone(520, 100, 0.03);
       openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
     });
