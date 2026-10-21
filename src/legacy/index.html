@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -14,14 +14,8 @@
 
 <body class="page-home">
   <div class="game-loading-screen is-waiting" id="gameLoadingScreen" role="status" aria-live="polite">
-    <div class="game-loading-card">
-      <span class="game-loading-spark game-loading-spark--left" aria-hidden="true">✦</span>
-      <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
-      <span class="game-loading-spark game-loading-spark--right" aria-hidden="true">✦</span>
-      <p class="game-loading-title">Siap-siap memasak!</p>
-      <p class="game-loading-message">Menyiapkan petualangan rasa...</p>
-      <div class="game-loading-track" aria-hidden="true"><span></span></div>
-    </div>
+    <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
+    <div class="game-loading-track" aria-hidden="true"><span></span></div>
   </div>
   <section class="idle-start-screen" id="idleStartScreen" aria-label="Mulai AyoMasak">
     <button class="idle-start-settings" type="button" aria-label="Pengaturan">
@@ -30,12 +24,9 @@
         <img class="button-art__frame" src="assets/Buttons/button-settings-frame.png" alt="" draggable="false">
       </span>
     </button>
-    <div class="idle-start-card">
-      <span class="idle-start-spark idle-start-spark--left" aria-hidden="true">✦</span>
+    <div class="idle-start-content">
       <img class="idle-start-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!">
-      <span class="idle-start-spark idle-start-spark--right" aria-hidden="true">✦</span>
-      <p class="idle-start-tagline">Petualangan rasa Nusantara</p>
-      <button class="idle-start-button" id="idleStartButton" type="button">Mulai</button>
+      <p class="idle-start-prompt" id="idleStartPrompt">Click anywhere to start</p>
     </div>
   </section>
   <div class="app">

@@ -61,16 +61,21 @@
 
   function startLoading() {
     if (idleStartScreen) {
-      idleStartScreen.classList.add('is-hidden');
-      idleStartScreen.setAttribute('aria-hidden', 'true');
+      // Pastikan loading screen aktif dan terlihat sebelum melepas idle start screen
       loadingScreen.classList.remove('is-waiting');
+      idleStartScreen.remove();
     }
 
     finishLoading();
   }
 
   if (idleStartScreen) {
-    document.getElementById('idleStartButton').addEventListener('click', startLoading, { once: true });
+    const handleStart = event => {
+      if (event.target.closest('.idle-start-settings')) return;
+      idleStartScreen.removeEventListener('click', handleStart);
+      startLoading();
+    };
+    idleStartScreen.addEventListener('click', handleStart);
   } else if (document.readyState === 'complete') {
     startLoading();
   } else {
