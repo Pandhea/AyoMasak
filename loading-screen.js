@@ -8,15 +8,17 @@
   }
 
   const minimumDisplayTime = 3000;
+  const maximumAssetWaitTime = 4000;
   const idleStartScreen = document.getElementById('idleStartScreen');
   let loadingStartedAt;
 
   async function finishLoading() {
     loadingStartedAt = performance.now();
     const images = [...document.images].filter(image =>
-      image.getAttribute('src') || image.getAttribute('srcset') || image.currentSrc
+      image.loading !== 'lazy' &&
+      (image.getAttribute('src') || image.getAttribute('srcset') || image.currentSrc)
     );
-    await Promise.all([
+    const assetsReady = Promise.all([
       Promise.all(images.map(async image => {
         if (!image.complete) {
           await new Promise(resolve => {
@@ -40,6 +42,14 @@
       })),
       document.fonts.ready
     ]);
+    let assetWaitTimeout;
+    await Promise.race([
+      assetsReady,
+      new Promise(resolve => {
+        assetWaitTimeout = window.setTimeout(resolve, maximumAssetWaitTime);
+      })
+    ]);
+    window.clearTimeout(assetWaitTimeout);
 
     const remainingDisplayTime = minimumDisplayTime - (performance.now() - loadingStartedAt);
     if (remainingDisplayTime > 0) {
@@ -75,7 +85,11 @@
       idleStartScreen.removeEventListener('click', handleStart);
       startLoading();
     };
-    idleStartScreen.addEventListener('click', handleStart);
+    if (new URLSearchParams(window.location.search).get('menu') === '1') {
+      startLoading();
+    } else {
+      idleStartScreen.addEventListener('click', handleStart);
+    }
   } else if (document.readyState === 'complete') {
     startLoading();
   } else {

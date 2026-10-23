@@ -1,6 +1,9 @@
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import homeDocument from '../legacy/index.html?raw';
+import audioScript from '../../audio.js?raw';
+import recipeCatalogScript from '../../recipe-catalog.js?raw';
+import loadingScreenScript from '../../loading-screen.js?raw';
 import kitchenDocument from '../legacy/ayomasak-dapur.html?raw';
 import destinationDocument from '../legacy/ayomasak-destinasi.html?raw';
 import recipesDocument from '../legacy/ayomasak-index-masakan.html?raw';
@@ -21,6 +24,12 @@ const documents = {
   settings: settingsDocument
 };
 
+const externalScripts = {
+  'audio.js': audioScript,
+  'recipe-catalog.js': recipeCatalogScript,
+  'loading-screen.js': loadingScreenScript
+};
+
 const pageMarkup = ref('');
 let insertedScripts = [];
 let originalTitle = '';
@@ -33,17 +42,15 @@ async function executeScript(scriptElement) {
   }
 
   if (scriptElement.src) {
-    script.src = new URL(scriptElement.getAttribute('src'), document.baseURI).href;
-    await new Promise((resolve, reject) => {
-      script.addEventListener('load', resolve, { once: true });
-      script.addEventListener('error', () => reject(new Error(`Gagal memuat skrip ${script.src}`)), { once: true });
-      document.body.appendChild(script);
-    });
+    const sourceName = new URL(scriptElement.getAttribute('src'), document.baseURI).pathname.split('/').pop();
+    const source = externalScripts[sourceName];
+    if (!source) throw new Error(`Skrip "${sourceName}" tidak ditemukan di bundle aplikasi.`);
+    script.textContent = source;
   } else {
-    script.textContent = scriptElement.textContent;
-    document.body.appendChild(script);
+    script.textContent = `(() => {\n${scriptElement.textContent}\n})();`;
   }
 
+  document.body.appendChild(script);
   insertedScripts.push(script);
 }
 

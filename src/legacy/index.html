@@ -30,73 +30,55 @@
     </div>
   </section>
   <div class="app">
-    <section class="screen map-screen active" id="mapScreen">
-      <div class="map-stage" id="mapStage" aria-label="Peta interaktif, geser untuk menjelajahi">
+    <section class="screen map-screen active" id="mapScreen" aria-label="Pilih daerah untuk memasak">
+      <div class="map-stage" id="mapStage" aria-label="Pilih daerah">
         <div class="map-topbar">
-          <div class="profile-chip">AyoMasak!</div>
+          <span class="profile-chip">Pilih daerah untuk mulai memasak</span>
           <div class="progress-chip">
             <span>⭐ <strong id="mapStars">0</strong></span>
-            <span id="mapProgress">0/6</span>
+            <span id="mapProgress">0/18 resep</span>
           </div>
         </div>
 
         <div class="map-art" id="mapArt">
-          <img class="map-image" src="assets/maps-crisp-clean.png" alt="Peta Indonesia" draggable="false" />
-          <div class="map-wave-motion" id="mapWaveMotion" aria-hidden="true"></div>
-          <svg class="map-bird-flight" viewBox="0 0 100 48" aria-hidden="true">
-            <path d="M4 25Q16 11 28 25Q40 11 52 25" />
-            <path class="map-bird-flight__small" d="M45 13Q53 4 61 13Q69 4 77 13" />
-            <path class="map-bird-flight__small" d="M68 34Q75 26 82 34Q89 26 96 34" />
-          </svg>
-          <button class="region-btn" data-region="jakarta" type="button">Jakarta</button>
-          <button class="region-btn" data-region="bandung" type="button">Bandung</button>
-          <button class="region-btn" data-region="semarang" type="button">Semarang</button>
-          <button class="region-btn" data-region="bali" type="button">Bali</button>
-          <button class="region-btn" data-region="padang" type="button">Padang</button>
-          <button class="region-btn" data-region="makassar" type="button">Makassar</button>
+          <div class="region-selection" aria-label="Pilihan daerah">
+            <button class="region-card" type="button" data-administration-id="ID-BT" data-name="Banten">
+              <img src="assets/map_menu/Frame Banten.png" alt="" draggable="false">
+              <span>Banten</span>
+            </button>
+            <button class="region-card" type="button" data-administration-id="ID-JK" data-name="DKI Jakarta">
+              <img src="assets/map_menu/Frame DKI Jakarta.png" alt="" draggable="false">
+              <span>DKI Jakarta</span>
+            </button>
+            <button class="region-card" type="button" data-administration-id="ID-JB" data-name="Jawa Barat">
+              <img src="assets/map_menu/Frame Jawa Barat.png" alt="" draggable="false">
+              <span>Jawa Barat</span>
+            </button>
+            <button class="region-card" type="button" data-administration-id="ID-JT" data-name="Jawa Tengah">
+              <img src="assets/map_menu/Frame Jawa Tengah.png" alt="" draggable="false">
+              <span>Jawa Tengah</span>
+            </button>
+            <button class="region-card" type="button" data-administration-id="ID-YO" data-name="DI Yogyakarta">
+              <img src="assets/map_menu/Frame DI Yogyakarta.png" alt="" draggable="false">
+              <span>DI Yogyakarta</span>
+            </button>
+            <button class="region-card" type="button" data-administration-id="ID-JI" data-name="Jawa Timur">
+              <img src="assets/map_menu/Frame Jawa Timur.png" alt="" draggable="false">
+              <span>Jawa Timur</span>
+            </button>
+          </div>
         </div>
-
-        <div class="hint-pill">Ketuk Daerah Kamu...</div>
       </div>
-
-      <button class="settings-btn" type="button" aria-label="Pengaturan">
-        <span class="button-art" aria-hidden="true">
-          <img class="button-art__face" src="assets/Buttons/button-settings-face.png" alt="" draggable="false" />
-          <img class="button-art__frame" src="assets/Buttons/button-settings-frame.png" alt="" draggable="false" />
-        </span>
-      </button>
-
-      <nav class="bottom-menu" aria-label="Menu utama">
-        <button class="menu-btn" type="button" aria-label="Cara Bermain">
-          <span class="button-art" aria-hidden="true">
-            <img class="button-art__face" src="assets/Buttons/button-how-to-play-face.png" alt="" draggable="false" />
-            <img class="button-art__frame" src="assets/Buttons/button-how-to-play-frame.png" alt="" draggable="false" />
-          </span>
-        </button>
-        <button class="menu-btn active" type="button" aria-label="Masakan">
-          <span class="button-art" aria-hidden="true">
-            <img class="button-art__face" src="assets/Buttons/button-recipe-index-face.png" alt="" draggable="false" />
-            <img class="button-art__frame" src="assets/Buttons/button-recipe-index-frame.png" alt=""
-              draggable="false" />
-          </span>
-        </button>
-        <button class="menu-btn" type="button" aria-label="Buku Stempel">
-          <span class="button-art" aria-hidden="true">
-            <img class="button-art__face" src="assets/Buttons/button-stamp-book-face.png" alt="" draggable="false" />
-            <img class="button-art__frame" src="assets/Buttons/button-stamp-book-frame.png" alt="" draggable="false" />
-          </span>
-        </button>
-      </nav>
     </section>
 
     <div class="overlay hidden" id="guideOverlay" aria-hidden="true">
       <div class="overlay-panel">
         <h3>Cara Bermain</h3>
         <ul>
-          <li>1. Pilih daerah di peta.</li>
-          <li>2. Pilih bahan yang cocok untuk langkah masak.</li>
-          <li>3. Tekan tombol selesai saat semua bahan sudah benar.</li>
-          <li>4. Selesaikan semua resep untuk mendapatkan stempel.</li>
+          <li>1. Pilih daerah yang ingin kamu jelajahi.</li>
+          <li>2. Gunakan 9 bahan khas daerah itu untuk menebak 3 masakannya.</li>
+          <li>3. Setiap masakan dibuat dari kombinasi 3 bahan yang tepat.</li>
+          <li>4. Resep yang berhasil akan terbuka di koleksi dan mendapat stempel daerah.</li>
         </ul>
         <div class="overlay-actions">
           <button class="close-btn" type="button" data-close="guide">Oke</button>
@@ -111,6 +93,16 @@
         <div class="stamp-grid" id="stampList"></div>
         <div class="overlay-actions">
           <button class="close-btn" type="button" data-close="stamp">Tutup</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="administrationOverlay" aria-hidden="true">
+      <div class="overlay-panel" role="dialog" aria-modal="true" aria-labelledby="administrationTitle">
+        <h3 id="administrationTitle"></h3>
+        <p id="administrationMessage"></p>
+        <div class="overlay-actions">
+          <button class="close-btn" type="button" data-close="administration">Tutup</button>
         </div>
       </div>
     </div>
@@ -169,14 +161,40 @@
 
       <div class="recipe-list" id="recipeList"></div>
     </section>
+
+    <nav class="bottom-menu" aria-label="Menu utama">
+      <div class="bottom-menu__container">
+        <button class="menu-btn" type="button" aria-label="Cara Bermain" title="Cara Bermain">
+          <img src="assets/new_button/Property 1=Default.png" alt="" draggable="false">
+        </button>
+        <button class="menu-btn" id="cookingMenuButton" type="button" aria-label="Mulai Memasak"
+          title="Pilih daerah terlebih dahulu" disabled>
+          <img src="assets/new_button/Property 1=Default-1.png" alt="" draggable="false">
+        </button>
+        <button class="menu-btn" id="collectionMenuButton" type="button" aria-label="Peta dan Koleksi"
+          title="Lihat peta dan resep yang terbuka">
+          <img src="assets/new_button/Property 1=Default-2.png" alt="" draggable="false">
+        </button>
+        <button class="settings-btn" type="button" aria-label="Pengaturan" title="Pengaturan">
+          <img src="assets/new_button/Property 1=Default-3.png" alt="" draggable="false">
+        </button>
+      </div>
+    </nav>
   </div>
 
   <script src="audio.js"></script>
   <script src="recipe-catalog.js"></script>
   <script>
     const STORAGE_KEY = 'ayoMasakProgress';
-    const regionOrder = ['jakarta', 'bandung', 'semarang', 'bali', 'padang', 'makassar'];
-
+    const regionOrder = window.AyoDishCatalog.cities.map(city => city.key);
+    const destinationByAdministration = {
+      'ID-BT': 'banten',
+      'ID-JK': 'jakarta',
+      'ID-JB': 'bandung',
+      'ID-JT': 'semarang',
+      'ID-YO': 'yogyakarta',
+      'ID-JI': 'surabaya'
+    };
     const regions = {
       jakarta: {
         name: 'Jakarta',
@@ -280,10 +298,11 @@
       completedDishesByCity: saved.completedDishesByCity || {},
       stars: Number(saved.stars || 0)
     };
+    let selectedAdministration = null;
+    let selectedCityKey = null;
 
     const mapScreen = document.getElementById('mapScreen');
     const gameScreen = document.getElementById('gameScreen');
-    const regionButtons = [...document.querySelectorAll('.region-btn')];
     const ingredientList = document.getElementById('ingredientList');
     const recipeTabs = document.getElementById('recipeTabs');
     const recipeList = document.getElementById('recipeList');
@@ -306,63 +325,51 @@
     const stampList = document.getElementById('stampList');
     const stampProgress = document.getElementById('stampProgress');
     const menuButtons = [...document.querySelectorAll('.menu-btn')];
+    const cookingMenuButton = document.getElementById('cookingMenuButton');
     const mapStage = document.getElementById('mapStage');
     const mapArt = document.getElementById('mapArt');
-    const mapImage = mapArt.querySelector('.map-image');
-    const mapWaveMotion = document.getElementById('mapWaveMotion');
+    const mapSvgs = [...mapArt.querySelectorAll('svg')];
     const destinationSheet = document.getElementById('destinationSheet');
     const destinationPanel = document.getElementById('destinationPanel');
     const destinationFrame = document.getElementById('destinationFrame');
+    const administrationOverlay = document.getElementById('administrationOverlay');
+    const administrationTitle = document.getElementById('administrationTitle');
+    const administrationMessage = document.getElementById('administrationMessage');
 
     let mapPan = { x: 0, y: 0 };
-    let mapZoom = 1;
+    const mobileMapQuery = window.matchMedia('(max-width: 800px)');
+    let mapZoom = mobileMapQuery.matches ? 1.32 : 1;
     let mapPointer = null;
     let activeMapPointers = new Map();
     let mapPinch = null;
     let mapDragTimer = 0;
     let isMapDragging = false;
     let suppressRegionClick = false;
-    const mapWaveDetails = [
-      [725, 404, 775, 418, 4, 33, 6.5], [752, 429, 819, 441, 15, 25, 7.2],
-      [1584, 456, 1638, 469, -14, 36, 7.4], [1537, 477, 1594, 489, -17, 30, 6.8], [1622, 496, 1651, 503, -24, 30, 6.1],
-      [1068, 590, 1111, 606, 25, 16, 6.8], [199, 710, 238, 722, 25, -18, 7.2], [193, 738, 226, 746, 30, -22, 6.6],
-      [1645, 689, 1714, 705, -28, -36, 7.1], [786, 835, 875, 865, 14, -35, 7.8],
-      [1311, 849, 1384, 864, -10, -32, 6.9], [1845, 896, 1871, 906, -38, -20, 6.7], [1796, 917, 1826, 927, -34, -25, 7.5],
-      [414, 991, 517, 1003, -10, -32, 7.1], [519, 996, 544, 1000, -18, -30, 6.3], [457, 1015, 508, 1025, -12, -34, 7.7],
-      [513, 1027, 534, 1034, -16, -36, 6.6], [1611, 1027, 1639, 1032, -10, -42, 7.4], [1655, 1037, 1733, 1053, -24, -38, 6.8],
-      [1436, 1052, 1538, 1067, -6, -36, 7.6], [1150, 1075, 1232, 1099, 12, -34, 7.2], [1465, 1080, 1515, 1092, -5, -34, 6.5],
-      [1528, 1081, 1552, 1090, -18, -31, 7.8], [137, 1129, 167, 1143, 30, -36, 6.9], [70, 1130, 112, 1143, 37, -30, 7.3],
-      [48, 1165, 82, 1179, 34, -24, 6.7]
-    ];
+    mapSvgs.forEach(mapSvg => {
+      mapSvg.setAttribute('role', 'group');
+      mapSvg.setAttribute('aria-label', 'Peta interaktif provinsi di Indonesia');
+      mapSvg.classList.add('map-image');
 
-    mapWaveDetails.forEach(([x0, y0, x1, y1, driftX, driftY, duration], index) => {
-      const wave = document.createElement('span');
-      const left = x0 - 4;
-      const top = y0 - 4;
-      const width = x1 - x0 + 9;
-      const height = y1 - y0 + 9;
-      wave.className = 'map-wave-detail';
-      wave.style.left = `${left / 2048 * 100}%`;
-      wave.style.top = `${top / 1476 * 100}%`;
-      wave.style.width = `${width / 2048 * 100}%`;
-      wave.style.height = `${height / 1476 * 100}%`;
-      wave.style.backgroundSize = `${2048 / width * 100}% ${1476 / height * 100}%`;
-      wave.style.backgroundPosition =
-        `${left / (2048 - width) * 100}% ${top / (1476 - height) * 100}%`;
-      const travelX = driftX === 0 ? 0 : Math.sign(driftX) * Math.max(32, Math.abs(driftX) * 2);
-      const travelY = driftY === 0 ? 0 : Math.sign(driftY) * Math.max(36, Math.abs(driftY) * 2);
-      wave.style.setProperty('--wave-drift-x', `${travelX / width * 100}%`);
-      wave.style.setProperty('--wave-drift-y', `${travelY / height * 100}%`);
-      wave.style.setProperty('--wave-duration', `${duration}s`);
-      wave.style.setProperty('--wave-delay', `${index % 12 * 0.28}s`);
-      mapWaveMotion.appendChild(wave);
+      mapSvg.querySelectorAll('path[data-administration-id]').forEach(path => {
+        const administrationName = path.getAttribute('data-name');
+        if (!administrationName) return;
+        path.setAttribute('role', 'button');
+        path.setAttribute('tabindex', '0');
+        path.setAttribute('aria-label', `Pilih ${administrationName}`);
+        path.addEventListener('click', () => {
+          if (!suppressRegionClick) openAdministration(path.dataset.administrationId, administrationName);
+        });
+        path.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openAdministration(path.dataset.administrationId, administrationName);
+          }
+        });
+      });
     });
 
     function getMaxMapZoom() {
-      if (!mapImage.naturalWidth || !mapImage.naturalHeight) return 1;
-      const widthLimit = mapImage.naturalWidth / mapArt.clientWidth;
-      const heightLimit = mapImage.naturalHeight / mapArt.clientHeight;
-      return Math.max(1, Math.min(3, widthLimit, heightLimit));
+      return 3;
     }
 
     function clampMapPan() {
@@ -511,22 +518,142 @@
       }
     }
 
-    mapStage.addEventListener('pointerdown', startMapPointer);
-    mapStage.addEventListener('pointermove', moveMapPointer);
-    mapStage.addEventListener('pointerup', endMapPointer);
-    mapStage.addEventListener('pointercancel', endMapPointer);
-    mapStage.addEventListener('lostpointercapture', endMapPointer);
-    mapStage.addEventListener('wheel', event => {
-      event.preventDefault();
-      zoomMap(mapZoom * (event.deltaY < 0 ? 1.12 : 1 / 1.12), event.clientX, event.clientY);
-    }, { passive: false });
+    let lastRegionTouchActivation = 0;
+    mapArt.querySelectorAll('.region-card').forEach(button => {
+      const entry = document.createElement('div');
+      entry.className = 'region-entry';
+      button.replaceWith(entry);
+      entry.appendChild(button);
 
-    window.addEventListener('resize', () => {
-      mapZoom = Math.min(mapZoom, getMaxMapZoom());
-      applyMapTransform();
+      const dropdown = document.createElement('section');
+      dropdown.className = 'region-dropdown';
+      dropdown.id = `regionDropdown-${button.dataset.administrationId}`;
+      dropdown.hidden = true;
+      dropdown.setAttribute('aria-label', `${button.dataset.name} masakan dan bahan`);
+
+      const closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'region-dropdown__close';
+      closeButton.setAttribute('aria-label', `Tutup pilihan ${button.dataset.name}`);
+      closeButton.textContent = '×';
+
+      const title = document.createElement('h2');
+      title.className = 'region-dropdown__title';
+      title.textContent = `Masakan ${button.dataset.name}`;
+
+      const subtitle = document.createElement('p');
+      subtitle.className = 'region-dropdown__subtitle';
+      subtitle.textContent = 'Temukan 3 masakan dengan memilih kombinasi tepat dari 9 bahan daerah ini.';
+
+      const dishList = document.createElement('ol');
+      dishList.className = 'region-dish-index';
+      dishList.setAttribute('aria-label', `Daftar masakan ${button.dataset.name}`);
+
+      const cookButton = document.createElement('button');
+      cookButton.type = 'button';
+      cookButton.className = 'region-dropdown__cook';
+      cookButton.textContent = 'Masak di daerah ini';
+      cookButton.addEventListener('click', () => {
+        if (!selectedCityKey) return;
+        window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(selectedCityKey)}`;
+      });
+
+      dropdown.append(closeButton, title, subtitle, dishList, cookButton);
+      entry.appendChild(dropdown);
+
+      closeButton.addEventListener('click', () => {
+        dropdown.hidden = true;
+        button.classList.remove('selected');
+        button.setAttribute('aria-expanded', 'false');
+      });
+
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('aria-expanded', 'false');
+      button.setAttribute('aria-controls', dropdown.id);
+      let touchStartPoint = null;
+      const activateRegion = () => {
+        const shouldOpen = dropdown.hidden;
+        mapArt.querySelectorAll('.region-dropdown').forEach(panel => {
+          panel.hidden = true;
+          const regionButton = panel.parentElement.querySelector('.region-card');
+          regionButton.classList.remove('selected');
+          regionButton.setAttribute('aria-expanded', 'false');
+        });
+
+        selectedAdministration = {
+          id: button.dataset.administrationId,
+          name: button.dataset.name
+        };
+        const cityKey = destinationByAdministration[selectedAdministration.id];
+        const city = window.AyoDishCatalog.cities.find(item => item.key === cityKey);
+        if (!city) throw new Error(`Katalog masakan untuk ${selectedAdministration.name} tidak tersedia.`);
+        selectedCityKey = city.key;
+        cookingMenuButton.disabled = false;
+        mapArt.querySelectorAll('.region-card').forEach(card => {
+          const isSelected = card === button;
+          card.classList.toggle('selected', isSelected);
+          card.setAttribute('aria-pressed', String(isSelected));
+        });
+        dropdown.hidden = !shouldOpen;
+        button.setAttribute('aria-expanded', String(shouldOpen));
+        if (shouldOpen) {
+          dishList.replaceChildren();
+          city.dishes.forEach((dish, index) => {
+            const item = document.createElement('li');
+            item.className = 'region-dish-index__item';
+            const unlocked = (state.completedDishesByCity[city.key] || []).includes(dish.id);
+            item.classList.toggle('is-unlocked', unlocked);
+            item.setAttribute('aria-label', unlocked
+              ? `${dish.dish} sudah terbuka`
+              : `Masakan ${index + 1} terkunci`);
+
+            const image = document.createElement('img');
+            image.className = 'region-dish-index__silhouette';
+            image.src = dish.image || `assets/Jawa/${city.assetFolder || city.name}/${dish.id}.png`;
+            image.alt = '';
+            image.loading = 'lazy';
+
+            const lock = document.createElement('span');
+            lock.className = 'region-dish-index__lock';
+            lock.setAttribute('aria-hidden', 'true');
+            lock.textContent = unlocked ? '✓' : '🔒';
+
+            const number = document.createElement('span');
+            number.className = 'region-dish-index__number';
+            number.textContent = String(index + 1);
+
+            const name = document.createElement('span');
+            name.className = 'region-dish-index__name';
+            name.textContent = unlocked ? dish.dish : '???';
+            item.append(image, lock, number, name);
+            dishList.appendChild(item);
+          });
+        }
+      };
+      button.addEventListener('pointerdown', event => {
+        touchStartPoint = event.pointerType === 'touch'
+          ? { x: event.clientX, y: event.clientY }
+          : null;
+      });
+      button.addEventListener('pointerup', event => {
+        if (event.pointerType !== 'touch' || !touchStartPoint) return;
+        const distance = Math.hypot(
+          event.clientX - touchStartPoint.x,
+          event.clientY - touchStartPoint.y
+        );
+        touchStartPoint = null;
+        if (distance > 8) return;
+        lastRegionTouchActivation = performance.now();
+        activateRegion();
+      });
+      button.addEventListener('pointercancel', () => {
+        touchStartPoint = null;
+      });
+      button.addEventListener('click', () => {
+        if (performance.now() - lastRegionTouchActivation < 700) return;
+        activateRegion();
+      });
     });
-    mapImage.addEventListener('load', applyMapTransform, { once: true });
-    applyMapTransform();
 
     function persistProgress() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -538,18 +665,19 @@
       }));
     }
 
-    function updateMapProgress() {
-      const completedCount = state.completedRegions.size;
-      mapStars.textContent = state.stars;
-      mapProgress.textContent = `${completedCount}/${regionOrder.length}`;
-
-      regionButtons.forEach(button => {
-        const regionKey = button.dataset.region;
-        const regionIndex = regionOrder.indexOf(regionKey);
-        const unlocked = regionIndex <= completedCount;
-        button.classList.toggle('locked', !unlocked);
-        button.disabled = !unlocked;
+    function getUnlockedDishes() {
+      return window.AyoDishCatalog.cities.flatMap(city => {
+        const unlockedIds = state.completedDishesByCity[city.key] || [];
+        return city.dishes
+          .filter(dish => unlockedIds.includes(dish.id))
+          .map(dish => ({ ...dish, city: city.city, regionName: city.name }));
       });
+    }
+
+    function updateMapProgress() {
+      const completedCount = getUnlockedDishes().length;
+      mapStars.textContent = state.stars;
+      mapProgress.textContent = `${completedCount}/${window.AyoDishCatalog.cities.reduce((total, city) => total + city.dishes.length, 0)} resep`;
     }
 
     function showScreen(name) {
@@ -557,8 +685,7 @@
       gameScreen.classList.toggle('active', name === 'game');
 
       menuButtons.forEach(button => {
-        const isActive = button.getAttribute('aria-label') === (name === 'map' ? 'Masakan' : 'Masakan') && name === 'game';
-        button.classList.toggle('active', isActive && button.getAttribute('aria-label') === 'Masakan');
+        button.classList.toggle('active', button.getAttribute('aria-label') === 'Peta dan Koleksi' && name === 'map');
       });
     }
 
@@ -620,6 +747,10 @@
     function hideOverlay(name) {
       if (name === 'guide') guideOverlay.classList.add('hidden');
       if (name === 'stamp') stampOverlay.classList.add('hidden');
+      if (name === 'administration') {
+        administrationOverlay.classList.add('hidden');
+        administrationOverlay.setAttribute('aria-hidden', 'true');
+      }
     }
 
     function showOverlay(name) {
@@ -630,13 +761,28 @@
       }
     }
 
+    function openAdministration(administrationId, administrationName) {
+      playTone(440, 120, 0.03);
+      const regionKey = destinationByAdministration[administrationId];
+      if (regionKey) {
+        openDestination(regionKey);
+        return;
+      }
+
+      administrationTitle.textContent = administrationName;
+      administrationMessage.textContent = `Destinasi ${administrationName} akan segera hadir.`;
+      administrationOverlay.classList.remove('hidden');
+      administrationOverlay.setAttribute('aria-hidden', 'false');
+      administrationOverlay.querySelector('.close-btn').focus();
+    }
+
     function openDestination(regionKey) {
-      const region = regions[regionKey];
-      if (!region) return;
+      const city = window.AyoDishCatalog.cities.find(item => item.key === regionKey);
+      if (!city) throw new Error(`Katalog masakan untuk daerah "${regionKey}" tidak tersedia.`);
       destinationPanel.classList.remove('destination-sheet__panel--center');
       destinationSheet.classList.remove('destination-sheet--center');
-      destinationPanel.setAttribute('aria-label', `Destinasi ${region.name}`);
-      destinationFrame.title = `Destinasi ${region.name}`;
+      destinationPanel.setAttribute('aria-label', `Destinasi ${city.name}`);
+      destinationFrame.title = `Destinasi ${city.name}`;
       destinationFrame.src = `ayomasak-destinasi.html?region=${encodeURIComponent(regionKey)}&embed=1`;
       destinationSheet.classList.remove('hidden');
       destinationSheet.setAttribute('aria-hidden', 'false');
@@ -661,6 +807,10 @@
       if (event.target === destinationSheet) closeDestination();
     });
 
+    administrationOverlay.addEventListener('click', event => {
+      if (event.target === administrationOverlay) hideOverlay('administration');
+    });
+
     destinationPanel.addEventListener('click', event => {
       if (event.target === destinationPanel && destinationSheet.classList.contains('destination-sheet--center')) {
         closeDestination();
@@ -670,6 +820,9 @@
     document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && !destinationSheet.classList.contains('hidden')) {
         closeDestination();
+      }
+      if (event.key === 'Escape' && !administrationOverlay.classList.contains('hidden')) {
+        hideOverlay('administration');
       }
     });
 
@@ -851,16 +1004,6 @@
       window.AyoAudio.playTone(freq, duration, volume);
     }
 
-    regionButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        if (suppressRegionClick) return;
-        if (!button.disabled) {
-          playTone(440, 120, 0.03);
-          openDestination(button.dataset.region);
-        }
-      });
-    });
-
     document.getElementById('backBtn').addEventListener('click', () => {
       playTone(260, 80, 0.03);
       showScreen('map');
@@ -892,8 +1035,14 @@
           return;
         }
 
-        if (label === 'Masakan') {
-          openHomePanel('ayomasak-index-masakan.html', 'Masakan');
+        if (label === 'Mulai Memasak') {
+          if (!selectedCityKey) return;
+          window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(selectedCityKey)}`;
+          return;
+        }
+
+        if (label === 'Peta dan Koleksi') {
+          showScreen('map');
         }
       });
     });
@@ -910,8 +1059,7 @@
 
     document.querySelectorAll('[data-close]').forEach(btn => {
       btn.addEventListener('click', () => {
-        const target = btn.dataset.close;
-        hideOverlay(target === 'guide' ? 'guide' : 'stamp');
+        hideOverlay(btn.dataset.close);
       });
     });
 

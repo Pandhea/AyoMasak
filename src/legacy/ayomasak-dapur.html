@@ -35,15 +35,14 @@
       <div class="inventory__grid" id="ingredientGrid" aria-label="Rak bahan. Seret bahan ke dalam wajan, atau gunakan Enter untuk memilih."></div>
     </section>
 
-    <div class="pan-stage" id="panDropZone" aria-label="Wajan, masukkan bahan yang dipilih">
-      <div class="pan-handle pan-handle--left" aria-hidden="true"></div>
-      <div class="pan-handle pan-handle--right" aria-hidden="true"></div>
+    <div class="pan-stage" id="panDropZone" aria-label="Panci, masukkan bahan yang dipilih">
+      <img class="pan-state-art pan-open-art" src="assets/panci/Panci%20terbuka.png" alt="" aria-hidden="true">
+      <img class="pan-state-art pan-closed-lid" src="assets/panci/Tutup%20panci.png" alt="" aria-hidden="true">
+      <img class="pan-state-art pan-success-art" src="assets/panci/Panci%20berhasil.png" alt="" aria-hidden="true">
+      <img class="pan-state-art pan-failed-art" src="assets/panci/Panci%20gagal.png" alt="" aria-hidden="true">
+      <span class="pan-failure-glow" aria-hidden="true"></span>
       <div class="pan-body">
-        <span class="pan-title" id="panTitle">Wajan</span>
         <div class="pan-items" id="panItems" aria-live="polite"></div>
-      </div>
-      <div class="pan-lid" aria-hidden="true">
-        <span class="pan-lid__knob"></span>
       </div>
       <div class="pan-steam" aria-hidden="true">
         <span class="pan-steam__puff"></span>
@@ -67,11 +66,7 @@
       </span>
     </button>
 
-    <p class="instruction">
-      <span class="instruction__text instruction__text--shadow" aria-hidden="true">Seret bahan dari rak ke dalam wajan!</span>
-      <span class="instruction__text">Seret bahan dari rak ke dalam wajan!</span>
-    </p>
-    <p class="cook-feedback" id="cookFeedback" aria-live="polite">Seret bahan dari rak ke dalam wajan.</p>
+    <p class="cook-feedback" id="cookFeedback" aria-live="polite"></p>
     <section class="story-scroll" id="storyScroll" hidden aria-labelledby="storyTitle">
       <div class="story-scroll__roller" aria-hidden="true"></div>
       <div class="story-scroll__paper" tabindex="0" role="region" aria-label="Cerita masakan, dapat digulir">
@@ -126,7 +121,7 @@
     </aside>
 
     <header class="kitchen__header">
-      <button class="tile-button tile-button--home" type="button" id="kitchenHomeBtn" aria-label="Kembali ke peta">
+      <button class="tile-button tile-button--home" type="button" id="kitchenHomeBtn" aria-label="Kembali ke menu utama">
         <span class="button-art" aria-hidden="true">
           <img class="button-art__face" src="assets/Buttons/button-home-face.png" alt="" draggable="false">
           <img class="button-art__frame" src="assets/Buttons/button-home-frame.png" alt="" draggable="false">
@@ -141,130 +136,24 @@
         </span>
       </button>
 
-      <section class="order" aria-label="Pesanan">
-        <div class="order__inner">
-          <span class="order__dish" id="dishIllustration" aria-hidden="true">
-            <img class="order__dish-photo" id="dishPhoto" alt="" hidden>
-            <span id="dishEmoji">🍳</span>
-          </span>
-          <span class="order__text order__text--title order__text--shadow" aria-hidden="true">Silahkan buat Makanan ini!</span>
-          <span class="order__text order__text--title">Silahkan buat Makanan ini!</span>
-          <span class="order__text order__text--name order__text--shadow" id="dishNameShadow" aria-hidden="true">Kerak Telur</span>
-          <span class="order__text order__text--name" id="dishName">Kerak Telur</span>
-        </div>
-      </section>
     </header>
-
-    <div class="kitchen__divider" aria-hidden="true"></div>
-
-    <div class="chef">
-      <div class="chef__clip">
-        <span class="chef__emoji" role="img" aria-label="Koki">👩‍🍳</span>
-      </div>
-    </div>
 
   </main>
   <script src="audio.js"></script>
   <script src="recipe-catalog.js"></script>
   <script>
-    const recipes = {
-      jakarta: { name: 'Jakarta', dish: 'Kerak Telur', emoji: '🍳', image: 'assets/Jawa/Jakarta/kerak-telor.png', ingredients: ['Beras ketan', 'Telur', 'Kelapa', 'Bawang goreng'] },
-      bandung: { name: 'Bandung', dish: 'Mie Kocok', emoji: '🍜', ingredients: ['Mie', 'Kaldu', 'Daging', 'Bawang'] },
-      semarang: { name: 'Semarang', dish: 'Lumpia Semarang', emoji: '🥟', ingredients: ['Rebung', 'Kulit lumpia', 'Ayam', 'Minyak'] },
-      bali: { name: 'Bali', dish: 'Sate Lilit', emoji: '🍢', ingredients: ['Ikan', 'Kelapa', 'Bawang', 'Cabai'] },
-      padang: { name: 'Padang', dish: 'Rendang', emoji: '🍛', ingredients: ['Daging', 'Santan', 'Cabai', 'Daun kunyit'] },
-      makassar: { name: 'Makassar', dish: 'Coto Makassar', emoji: '🥣', ingredients: ['Daging', 'Kaldu', 'Kacang', 'Bawang'] }
-    };
-    const pantry = [
-      { name: 'Beras ketan', emoji: '🍚' },
-      { name: 'Telur', emoji: '🥚' },
-      { name: 'Kelapa', emoji: '🥥' },
-      { name: 'Bawang goreng', emoji: '🧅' },
-      { name: 'Kecap', emoji: '🍶' },
-      { name: 'Mie', emoji: '🍜' },
-      { name: 'Kaldu', emoji: '🥣' },
-      { name: 'Daging', emoji: '🥩' },
-      { name: 'Bawang', emoji: '🧅' },
-      { name: 'Rebung', emoji: '🎋' },
-      { name: 'Kulit lumpia', emoji: '🥟' },
-      { name: 'Ayam', emoji: '🍗' },
-      { name: 'Minyak', emoji: '🫒' },
-      { name: 'Ikan', emoji: '🐟' },
-      { name: 'Cabai', emoji: '🌶️' },
-      { name: 'Santan', emoji: '🥛' },
-      { name: 'Daun kunyit', emoji: '🌿' },
-      { name: 'Kacang', emoji: '🥜' },
-      { name: 'Bandeng', emoji: '🐟' },
-      { name: 'Nasi', emoji: '🍚' },
-      { name: 'Jahe', emoji: '🫚' },
-      { name: 'Sumsum sapi', emoji: '🥩' },
-      { name: 'Daging sapi', emoji: '🥩' },
-      { name: 'Daun pisang', emoji: '🍃' },
-      { name: 'Daun pandan', emoji: '🌿' },
-      { name: 'Daun salam', emoji: '🍃' },
-      { name: 'Tepung beras', emoji: '🌾' },
-      { name: 'Gula merah', emoji: '🟤' },
-      { name: 'Daun jati', emoji: '🍃' },
-      { name: 'Kerupuk', emoji: '🍘' },
-      { name: 'Kencur', emoji: '🫚' },
-      { name: 'Kol', emoji: '🥬' },
-      { name: 'Kacang tanah', emoji: '🥜' },
-      { name: 'Tauge', emoji: '🌱' },
-      { name: 'Timun', emoji: '🥒' },
-      { name: 'Belimbing wuluh', emoji: '🍈' },
-      { name: 'Tomat', emoji: '🍅' },
-      { name: 'Nangka muda', emoji: '🍈' },
-      { name: 'Garam', emoji: '🧂' },
-      { name: 'Daging kambing', emoji: '🍖' },
-      { name: 'Tepung terigu', emoji: '🌾' },
-      { name: 'Kacang hijau', emoji: '🫘' },
-      { name: 'Gula', emoji: '🍬' },
-      { name: 'Kluwek', emoji: '🫘' },
-      { name: 'Cingur', emoji: '🥩' },
-      { name: 'Petis', emoji: '🥣' },
-      { name: 'Sayuran', emoji: '🥬' },
-      { name: 'Lontong', emoji: '🍚' },
-      { name: 'Tahu', emoji: '🧈' },
-      { name: 'Tusuk besi', emoji: '🍢' },
-      { name: 'Bandeng', emoji: '🐟' },
-      { name: 'Jahe', emoji: '🫚' },
-      { name: 'Sumsum sapi', emoji: '🥩' },
-      { name: 'Daun pisang', emoji: '🍃' },
-      { name: 'Daun pandan', emoji: '🌿' },
-      { name: 'Daun salam', emoji: '🍃' },
-      { name: 'Tepung beras', emoji: '🌾' },
-      { name: 'Gula merah', emoji: '🟤' },
-      { name: 'Kerupuk', emoji: '🍘' },
-      { name: 'Kencur', emoji: '🫚' },
-      { name: 'Kol', emoji: '🥬' },
-      { name: 'Kacang tanah', emoji: '🥜' },
-      { name: 'Tauge', emoji: '🌱' },
-      { name: 'Timun', emoji: '🥒' },
-      { name: 'Belimbing wuluh', emoji: '🍈' },
-      { name: 'Tomat', emoji: '🍅' },
-      { name: 'Nangka muda', emoji: '🍈' },
-      { name: 'Garam', emoji: '🧂' },
-      { name: 'Daging kambing', emoji: '🍖' },
-      { name: 'Tepung terigu', emoji: '🌾' },
-      { name: 'Kacang hijau', emoji: '🫘' },
-      { name: 'Gula', emoji: '🍬' },
-      { name: 'Kluwek', emoji: '🫘' },
-      { name: 'Cingur', emoji: '🥩' },
-      { name: 'Petis', emoji: '🥣' },
-      { name: 'Sayuran', emoji: '🥬' },
-      { name: 'Lontong', emoji: '🍚' },
-      { name: 'Tahu', emoji: '🧈' },
-      { name: 'Tusuk besi', emoji: '🍢' }
-    ];
     const selectedRegion = new URLSearchParams(window.location.search).get('region');
     const selectedDish = new URLSearchParams(window.location.search).get('dish');
-    const regionalRecipe = recipes[selectedRegion] || recipes.jakarta;
     const selectedCity = window.AyoDishCatalog.cities.find(city => city.key === selectedRegion);
+    if (!selectedCity) {
+      if (selectedRegion) throw new Error(`Daerah "${selectedRegion}" tidak ditemukan.`);
+      window.location.replace('index.html');
+      return;
+    }
     const catalogDish = selectedCity?.dishes.find(dish => dish.id === selectedDish);
     if (selectedDish && !catalogDish) {
       throw new Error(`Resep "${selectedDish}" tidak ditemukan untuk daerah "${selectedRegion}".`);
     }
-    const activeRegion = catalogDish ? selectedCity.key : recipes[selectedRegion] ? selectedRegion : 'jakarta';
     const recipe = catalogDish
       ? {
           ...catalogDish,
@@ -278,16 +167,14 @@
           name: selectedCity.name,
           city: selectedCity.city
         }
-      : regionalRecipe;
-    const cookingSequence = [
-      { region: 'jakarta', dish: 'kerak-telor' },
-      { region: 'jakarta', dish: 'soto-betawi' },
-      { region: 'bandung' },
-      { region: 'semarang' },
-      { region: 'bali' },
-      { region: 'padang' },
-      { region: 'makassar' }
-    ];
+      : {
+          name: selectedCity.name,
+          dish: 'Tebak Masakan!',
+          emoji: '🍳',
+          ingredients: []
+        };
+    let matchedDish = catalogDish;
+    let matchedCity = catalogDish ? selectedCity : null;
     const backstories = {
       'Kerak Telur': 'Kerak telor dikenal sebagai jajanan khas Betawi. Adonan ketan dan telur dimasak di atas arang, lalu wajan dibalik agar permukaannya matang dan berkerak. Taburan kelapa sangrai dan bawang goreng melengkapi rasanya.',
       'Soto Betawi': 'Soto Betawi adalah soto khas Jakarta dengan kuah gurih yang biasanya memadukan santan atau susu dan kaldu. Sebutan “Soto Betawi” mulai dikenal luas pada abad ke-20 dan kini menjadi salah satu ikon kuliner ibu kota.',
@@ -318,35 +205,33 @@
     let activeDrag = null;
     let isCooked = false;
     let isCooking = false;
-    let isBurnt = false;
+    let isFailed = false;
     let cookingTimer = null;
 
-    document.getElementById('dishName').textContent = recipe.dish;
-    document.getElementById('dishNameShadow').textContent = recipe.dish;
-    const dishPhoto = document.getElementById('dishPhoto');
-    const dishEmoji = document.getElementById('dishEmoji');
-    dishEmoji.textContent = recipe.emoji;
-    if (recipe.image) {
-      dishPhoto.src = recipe.image;
-      dishPhoto.alt = recipe.dish;
-      dishPhoto.hidden = false;
-      dishEmoji.hidden = true;
+    const regionalIngredientNames = selectedCity.dishes.flatMap(dish => dish.ingredients);
+    if (selectedCity.dishes.length !== 3 ||
+        selectedCity.dishes.some(dish => dish.ingredients.length !== 3) ||
+        regionalIngredientNames.length !== 9) {
+      throw new Error(`Data resep ${selectedCity.name} harus berisi 3 masakan dengan total 9 slot bahan.`);
     }
-    document.querySelector('.order__text--title:not(.order__text--shadow)').textContent =
-      `Silakan buat makanan ${recipe.name}!`;
-    document.querySelector('.order__text--title.order__text--shadow').textContent =
-      `Silakan buat makanan ${recipe.name}!`;
 
-    const availableIngredients = [
-      ...recipe.ingredients.map(name => {
-        const ingredient = pantry.find(item => item.name === name);
-        if (!ingredient) {
-          throw new Error(`Bahan "${name}" untuk resep ${recipe.dish} tidak ditemukan di pantry.`);
-        }
-        return { ...ingredient, image: recipe.ingredientImages?.[name] };
-      }),
-      ...pantry.filter(item => !recipe.ingredients.includes(item.name))
-    ].slice(0, 15);
+    function shuffleIngredients(ingredients) {
+      const shuffled = [...ingredients];
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+      }
+      return shuffled;
+    }
+
+    const availableIngredients = shuffleIngredients(selectedCity.dishes.flatMap(dish =>
+      dish.ingredients.map((name, index) => ({
+        id: `${dish.id}-${index + 1}`,
+        name,
+        emoji: '🥘',
+        image: `assets/resource_bahan/crops/${selectedCity.key}/${dish.id}-${index + 1}.png`
+      }))
+    ));
 
     function createIngredientVisual(ingredient, className) {
       if (ingredient.image) {
@@ -367,49 +252,39 @@
 
     function renderPan() {
       panItems.replaceChildren();
-      if (isBurnt) {
-        for (let index = 0; index < 6; index += 1) {
-          const charredPiece = document.createElement('span');
-          charredPiece.className = 'pan-char';
-          charredPiece.setAttribute('aria-hidden', 'true');
-          panItems.appendChild(charredPiece);
-        }
-        return;
-      }
       if (isCooked) {
         const finishedDish = document.createElement('span');
         finishedDish.className = 'pan-result';
-        finishedDish.textContent = recipe.emoji;
-        finishedDish.setAttribute('aria-label', recipe.dish);
+        finishedDish.textContent = matchedDish?.emoji || recipe.emoji;
+        finishedDish.setAttribute('aria-label', matchedDish?.dish || recipe.dish);
         panItems.appendChild(finishedDish);
         return;
       }
-      selectedIngredients.forEach(name => {
-        const ingredient = availableIngredients.find(item => item.name === name);
+      selectedIngredients.forEach(ingredientId => {
+        const ingredient = availableIngredients.find(item => item.id === ingredientId);
         if (!ingredient) return;
         const item = document.createElement('span');
         item.className = 'pan-item';
         item.appendChild(createIngredientVisual(ingredient, 'pan-item__art'));
-        item.setAttribute('aria-label', name);
+        item.setAttribute('aria-label', ingredient.name);
         panItems.appendChild(item);
       });
       panStage.classList.toggle('has-items', selectedIngredients.size > 0);
-      panStage.classList.remove('is-burnt', 'is-ready');
     }
 
-    function toggleIngredient(name) {
-      if (isCooking || isCooked || isBurnt) return;
-      if (selectedIngredients.has(name)) {
-        selectedIngredients.delete(name);
+    function toggleIngredient(ingredientId) {
+      if (isCooking || isCooked || isFailed) return;
+      if (selectedIngredients.has(ingredientId)) {
+        selectedIngredients.delete(ingredientId);
         window.AyoAudio.playTone(300, 75, 0.025);
       } else {
-        selectedIngredients.add(name);
+        selectedIngredients.add(ingredientId);
         window.AyoAudio.playTone(460, 85, 0.025);
       }
-      const button = ingredientGrid.querySelector(`[data-ingredient="${CSS.escape(name)}"]`);
+      const button = ingredientGrid.querySelector(`[data-ingredient="${CSS.escape(ingredientId)}"]`);
       if (button) {
-        button.classList.toggle('selected', selectedIngredients.has(name));
-        button.setAttribute('aria-pressed', String(selectedIngredients.has(name)));
+        button.classList.toggle('selected', selectedIngredients.has(ingredientId));
+        button.setAttribute('aria-pressed', String(selectedIngredients.has(ingredientId)));
       }
       renderPan();
       cookFeedback.textContent = selectedIngredients.size
@@ -426,6 +301,18 @@
 
     function moveDragGhost(clientX, clientY) {
       if (!activeDrag) return;
+      const movementX = clientX - activeDrag.startX;
+      const movementY = clientY - activeDrag.startY;
+      if (!activeDrag.didMove && Math.hypot(movementX, movementY) < 8) return;
+      activeDrag.didMove = true;
+      if (!activeDrag.ghost) {
+        activeDrag.ghost = document.createElement('span');
+        activeDrag.ghost.className = 'drag-ghost';
+        activeDrag.ghost.setAttribute('aria-hidden', 'true');
+        activeDrag.ghost.appendChild(createIngredientVisual(activeDrag.ingredient, 'drag-ghost__icon'));
+        document.body.appendChild(activeDrag.ghost);
+        activeDrag.button.classList.add('is-dragging');
+      }
       activeDrag.ghost.style.left = `${clientX}px`;
       activeDrag.ghost.style.top = `${clientY}px`;
       const overPan = isOverPan(clientX, clientY);
@@ -434,22 +321,27 @@
 
     function finishIngredientDrag(event, dropped) {
       if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
-      const { button, name, ghost } = activeDrag;
-      const overPan = dropped && isOverPan(event.clientX, event.clientY);
+      const { button, ingredient, ghost, didMove } = activeDrag;
+      const overPan = didMove && dropped && isOverPan(event.clientX, event.clientY);
       if (button.hasPointerCapture(event.pointerId)) {
         button.releasePointerCapture(event.pointerId);
       }
       button.classList.remove('is-dragging');
-      ghost.remove();
+      ghost?.remove();
       panBody.classList.remove('is-drop-target');
       activeDrag = null;
 
-      if (overPan) {
-        if (selectedIngredients.has(name)) {
-          cookFeedback.textContent = `${name} sudah ada di wajan.`;
+      if (!didMove) {
+        toggleIngredient(ingredient.id);
+        cookFeedback.textContent = selectedIngredients.has(ingredient.id)
+          ? `${ingredient.name} masuk ke wajan.`
+          : `${ingredient.name} dikeluarkan dari wajan.`;
+      } else if (overPan) {
+        if (selectedIngredients.has(ingredient.id)) {
+          cookFeedback.textContent = `${ingredient.name} sudah ada di wajan.`;
         } else {
-          toggleIngredient(name);
-          cookFeedback.textContent = `${name} masuk ke wajan.`;
+          toggleIngredient(ingredient.id);
+          cookFeedback.textContent = `${ingredient.name} masuk ke wajan.`;
         }
       } else if (dropped) {
         cookFeedback.textContent = 'Lepaskan bahan di bagian dalam wajan untuk memasukkannya.';
@@ -463,7 +355,7 @@
       button.type = 'button';
       button.className = 'slot';
       button.draggable = false;
-      button.dataset.ingredient = ingredient.name;
+      button.dataset.ingredient = ingredient.id;
       button.setAttribute('aria-label', ingredient.name);
       button.setAttribute('aria-pressed', 'false');
       const visual = createIngredientVisual(
@@ -479,21 +371,21 @@
       check.setAttribute('aria-hidden', 'true');
       button.append(visual, label, check);
       button.addEventListener('click', event => {
-        if (event.detail === 0) toggleIngredient(ingredient.name);
+        if (event.detail === 0) toggleIngredient(ingredient.id);
       });
       button.addEventListener('pointerdown', event => {
-        if (isCooking || isCooked || isBurnt || event.button !== 0 || activeDrag) return;
+        if (isCooking || isCooked || isFailed || event.button !== 0 || activeDrag) return;
         event.preventDefault();
-        const ghost = document.createElement('span');
-        ghost.className = 'drag-ghost';
-        ghost.setAttribute('aria-hidden', 'true');
-        ghost.appendChild(createIngredientVisual(ingredient, 'drag-ghost__icon'));
-        document.body.appendChild(ghost);
-        activeDrag = { button, name: ingredient.name, pointerId: event.pointerId, ghost };
-        button.classList.add('is-dragging');
+        activeDrag = {
+          button,
+          ingredient,
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          didMove: false,
+          ghost: null
+        };
         button.setPointerCapture(event.pointerId);
-        moveDragGhost(event.clientX, event.clientY);
-        cookFeedback.textContent = `Seret ${ingredient.name} ke dalam wajan.`;
       });
       ingredientGrid.appendChild(button);
     });
@@ -506,7 +398,7 @@
     document.addEventListener('pointercancel', event => finishIngredientDrag(event, false));
 
     function showCookingStampReward() {
-      if (!catalogDish || !selectedCity) return;
+      if (!matchedDish || !matchedCity) return false;
       const storageKey = 'ayoMasakProgress';
       const savedProgress = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
       const cookingStamps = Array.isArray(savedProgress.cookingStamps)
@@ -516,19 +408,18 @@
         typeof savedProgress.completedDishesByCity === 'object'
         ? { ...savedProgress.completedDishesByCity }
         : {};
-      const previousCompletedDishes = Array.isArray(completedDishesByCity[activeRegion])
-        ? [...completedDishesByCity[activeRegion]]
+      const previousCompletedDishes = Array.isArray(completedDishesByCity[matchedCity.key])
+        ? [...completedDishesByCity[matchedCity.key]]
         : [];
-      const wasCityComplete = selectedCity.dishes.every(dish => previousCompletedDishes.includes(dish.id));
       const completedDishes = previousCompletedDishes;
-      if (!completedDishes.includes(catalogDish.id)) completedDishes.push(catalogDish.id);
-      completedDishesByCity[activeRegion] = completedDishes;
+      if (!completedDishes.includes(matchedDish.id)) completedDishes.push(matchedDish.id);
+      completedDishesByCity[matchedCity.key] = completedDishes;
 
-      const totalDishes = selectedCity.dishes.length;
-      const completedCount = selectedCity.dishes.filter(dish => completedDishes.includes(dish.id)).length;
+      const totalDishes = matchedCity.dishes.length;
+      const completedCount = matchedCity.dishes.filter(dish => completedDishes.includes(dish.id)).length;
       const cityComplete = completedCount === totalDishes;
-      const isNewStamp = cityComplete && !wasCityComplete;
-      if (cityComplete && !cookingStamps.includes(activeRegion)) cookingStamps.push(activeRegion);
+      const isNewStamp = cityComplete && !cookingStamps.includes(matchedCity.key);
+      if (cityComplete && !cookingStamps.includes(matchedCity.key)) cookingStamps.push(matchedCity.key);
 
       localStorage.setItem(storageKey, JSON.stringify({
         ...savedProgress,
@@ -538,25 +429,25 @@
 
       const rewardEmoji = document.getElementById('stampRewardEmoji');
       const rewardImage = document.getElementById('stampRewardImage');
-      rewardEmoji.textContent = recipe.emoji;
+      rewardEmoji.textContent = matchedDish.emoji;
       rewardEmoji.hidden = cityComplete;
       rewardImage.hidden = !cityComplete;
       if (cityComplete) {
-        rewardImage.src = selectedCity.stamp;
-        rewardImage.alt = `Stempel Kota ${selectedCity.name}`;
+        rewardImage.src = matchedCity.stamp;
+        rewardImage.alt = `Stempel Kota ${matchedCity.name}`;
       }
 
       const title = document.getElementById('stampRewardTitle');
       const message = document.getElementById('stampRewardText');
       if (isNewStamp) {
-        title.textContent = `Stempel ${selectedCity.name} didapat!`;
-        message.textContent = `Semua ${totalDishes} masakan di ${selectedCity.city} selesai. Stempelmu tersimpan di Buku Stempel.`;
+        title.textContent = `Stempel ${matchedCity.name} didapat!`;
+        message.textContent = `Semua ${totalDishes} masakan di ${matchedCity.city} selesai. Stempel daerah berhasil dikoleksi!`;
       } else if (cityComplete) {
-        title.textContent = `Stempel ${selectedCity.name} sudah dikoleksi`;
-        message.textContent = `Semua masakan di ${selectedCity.city} sudah selesai. Lihat koleksimu di Buku Stempel pada beranda.`;
+        title.textContent = `Stempel ${matchedCity.name} sudah dikoleksi`;
+        message.textContent = `Semua masakan di ${matchedCity.city} sudah selesai. Semua resepnya ada di koleksi.`;
       } else {
         title.textContent = `${completedCount}/${totalDishes} masakan selesai`;
-        message.textContent = `Selesaikan ${totalDishes - completedCount} masakan lagi di ${selectedCity.city} untuk mendapatkan stempel.`;
+        message.textContent = `${matchedDish.dish} terbuka dan masuk ke koleksi daerah.`;
       }
       stampReward.hidden = false;
       const rewardActions = document.getElementById('stampRewardActions');
@@ -567,11 +458,32 @@
       return cityComplete;
     }
 
+    function saveDiscoveredDish() {
+      if (!matchedDish || !matchedCity) return;
+      const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
+      const completedDishesByCity = savedProgress.completedDishesByCity &&
+        typeof savedProgress.completedDishesByCity === 'object'
+        ? { ...savedProgress.completedDishesByCity }
+        : {};
+      const cityDishes = Array.isArray(completedDishesByCity[matchedCity.key])
+        ? [...completedDishesByCity[matchedCity.key]]
+        : [];
+      const isNewDish = !cityDishes.includes(matchedDish.id);
+      if (isNewDish) cityDishes.push(matchedDish.id);
+      completedDishesByCity[matchedCity.key] = cityDishes;
+      const stars = Number(savedProgress.stars || 0) + (isNewDish ? 1 : 0);
+      localStorage.setItem('ayoMasakProgress', JSON.stringify({
+        ...savedProgress,
+        completedDishesByCity,
+        stars
+      }));
+    }
+
     function finishStoryClose() {
       if (!storyScroll.classList.contains('is-closing')) return;
       window.clearTimeout(storyCloseTimer);
       storyScroll.hidden = true;
-      storyScroll.classList.remove('is-closing');
+      storyScroll.classList.remove('is-closing', 'is-fullscreen');
       const cityComplete = showCookingStampReward();
       cookButton.hidden = true;
       continueButton.hidden = cityComplete;
@@ -585,18 +497,26 @@
     function renderRecipeHint() {
       document.getElementById('recipeHintTitle').textContent = recipe.dish;
       recipeHintIngredients.replaceChildren();
-      recipe.ingredients.forEach(name => {
-        const pantryIngredient = availableIngredients.find(item => item.name === name);
-        if (!pantryIngredient) {
-          throw new Error(`Bahan "${name}" untuk resep ${recipe.dish} tidak ditemukan di pantry.`);
+      if (!catalogDish) {
+        const hint = document.createElement('li');
+        hint.className = 'recipe-hint__ingredient';
+        hint.textContent = `Pilih tepat 3 dari 9 bahan khas ${selectedCity.name}. Temukan kombinasi yang cocok untuk membuka salah satu masakannya.`;
+        recipeHintIngredients.appendChild(hint);
+        return;
+      }
+      recipe.ingredients.forEach((name, index) => {
+        const ingredientId = `${recipe.id}-${index + 1}`;
+        const recipeIngredient = availableIngredients.find(item => item.id === ingredientId);
+        if (!recipeIngredient) {
+          throw new Error(`Slot bahan "${name}" untuk resep ${recipe.dish} tidak ditemukan.`);
         }
         const item = document.createElement('li');
         item.className = 'recipe-hint__ingredient';
-        if (selectedIngredients.has(name)) item.classList.add('is-selected');
+        if (selectedIngredients.has(ingredientId)) item.classList.add('is-selected');
 
         const visual = createIngredientVisual(
-          pantryIngredient,
-          pantryIngredient.image ? 'recipe-hint__image' : 'recipe-hint__emoji'
+          recipeIngredient,
+          recipeIngredient.image ? 'recipe-hint__image' : 'recipe-hint__emoji'
         );
 
         const label = document.createElement('span');
@@ -605,7 +525,7 @@
 
         const status = document.createElement('span');
         status.className = 'recipe-hint__status';
-        status.textContent = selectedIngredients.has(name) ? 'Sudah di wajan' : 'Belum dimasukkan';
+        status.textContent = selectedIngredients.has(ingredientId) ? 'Sudah di wajan' : 'Belum dimasukkan';
 
         item.append(visual, label, status);
         recipeHintIngredients.appendChild(item);
@@ -699,22 +619,28 @@
       panStage.classList.add('is-ready');
       renderPan();
       window.AyoAudio.playTone(740, 180, 0.035);
-      cookFeedback.textContent = `Matang! ${recipe.dish} siap disajikan.`;
-      document.getElementById('storyTitle').textContent = recipe.dish;
-      document.getElementById('storyText').textContent = recipe.story || backstories[recipe.dish] || '';
-      document.getElementById('storyDishImage').setAttribute('aria-label', `Ilustrasi ${recipe.dish}`);
+      const cookedDish = matchedDish || recipe;
+      cookFeedback.textContent = `Matang! ${cookedDish.dish} terbuka dan masuk ke koleksi daerah.`;
+      document.getElementById('storyTitle').textContent = cookedDish.dish;
+      document.getElementById('storyText').textContent = cookedDish.story || backstories[cookedDish.dish] || '';
+      document.getElementById('storyDishImage').setAttribute('aria-label', `Ilustrasi ${cookedDish.dish}`);
       const storyDishPhoto = document.getElementById('storyDishPhoto');
       const storyDishPlaceholder = document.getElementById('storyDishPlaceholder');
-      storyDishPlaceholder.textContent = recipe.emoji;
-      if (recipe.image) {
-        storyDishPhoto.src = recipe.image;
-        storyDishPhoto.alt = recipe.dish;
+      storyDishPlaceholder.textContent = cookedDish.emoji;
+      const imagePath = cookedDish.image || (matchedCity
+        ? `assets/Jawa/${matchedCity.assetFolder || matchedCity.city}/${cookedDish.id}.png`
+        : '');
+      if (imagePath) {
+        storyDishPhoto.src = imagePath;
+        storyDishPhoto.alt = cookedDish.dish;
         storyDishPhoto.hidden = false;
         storyDishPlaceholder.hidden = true;
       } else {
         storyDishPhoto.hidden = true;
         storyDishPlaceholder.hidden = false;
       }
+      document.body.appendChild(storyScroll);
+      storyScroll.classList.add('is-fullscreen');
       storyScroll.hidden = false;
       requestAnimationFrame(() => storyScroll.classList.add('is-open'));
       setCookButtonLabel('Matang!');
@@ -722,10 +648,10 @@
     }
 
     function restartCooking() {
-      if (isCooking || !isBurnt) return;
-      isBurnt = false;
+      if (isCooking || !isFailed) return;
+      isFailed = false;
       selectedIngredients.clear();
-      panStage.classList.remove('is-burnt', 'is-ready', 'has-items');
+      panStage.classList.remove('is-failed', 'is-ready', 'has-items');
       ingredientGrid.querySelectorAll('.slot').forEach(button => {
         button.disabled = false;
         button.classList.remove('selected');
@@ -733,11 +659,11 @@
       });
       renderPan();
       setCookButtonLabel('Masak!');
-      cookFeedback.textContent = 'Masakan gosong. Pilih bahan lagi, lalu coba masak ulang.';
+      cookFeedback.textContent = 'Pilih bahan lagi, lalu coba masak ulang.';
     }
 
     cookButton.addEventListener('click', () => {
-      if (isBurnt) {
+      if (isFailed) {
         restartCooking();
         return;
       }
@@ -748,8 +674,6 @@
         return;
       }
 
-      const correct = recipe.ingredients.every(name => selectedIngredients.has(name)) &&
-        [...selectedIngredients].every(name => recipe.ingredients.includes(name));
       isCooking = true;
       panStage.classList.add('is-cooking');
       cookButton.disabled = true;
@@ -763,24 +687,36 @@
         isCooking = false;
         panStage.classList.remove('is-cooking');
 
+        matchedCity = selectedCity;
+        matchedDish = selectedCity.dishes.find(dish =>
+          (!catalogDish || dish.id === catalogDish.id) &&
+          dish.ingredients.length === selectedIngredients.size &&
+          dish.ingredients.every((_, index) => selectedIngredients.has(`${dish.id}-${index + 1}`))
+        ) || null;
+        const correct = Boolean(matchedDish);
         if (correct) {
           cookButton.disabled = true;
+          saveDiscoveredDish();
           showSuccessfulCook();
           return;
         }
 
-        isBurnt = true;
-        panStage.classList.add('is-burnt');
+        isFailed = true;
         renderPan();
+        panStage.classList.add('is-failed');
         cookButton.disabled = false;
         setCookButtonLabel('Mulai Ulang');
-        cookFeedback.textContent = 'Gosong! Bahan atau takarannya kurang tepat. Tekan Mulai Ulang untuk mencoba lagi.';
+        cookFeedback.textContent = 'Masakan belum berhasil. Bahan atau kombinasinya kurang tepat. Tekan Mulai Ulang untuk mencoba lagi.';
         window.AyoAudio.playTone(180, 220, 0.035);
       }, 3000);
     });
 
     continueButton.addEventListener('click', () => {
       if (!isCooked || !storyScroll.hidden) return;
+      if (!selectedDish) {
+        window.location.href = 'index.html';
+        return;
+      }
       if (catalogDish && selectedCity) {
         const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
         const completedDishes = Array.isArray(savedProgress.completedDishesByCity?.[selectedCity.key])
@@ -796,25 +732,12 @@
         return;
       }
 
-      const currentIndex = cookingSequence.findIndex(item =>
-        item.region === activeRegion &&
-        (item.dish ? item.dish === (selectedDish || 'kerak-telor') : !selectedDish)
-      );
-      const next = cookingSequence[currentIndex + 1];
-      if (!next) {
-        window.location.href = 'index.html';
-        return;
-      }
-
-      const query = new URLSearchParams({ region: next.region });
-      if (next.dish) query.set('dish', next.dish);
-      window.location.href = `ayomasak-dapur.html?${query.toString()}`;
     });
 
     document.getElementById('nextCityButton').addEventListener('click', () => {
-      if (!catalogDish || !selectedCity) return;
+      if (!matchedCity) return;
       const cities = window.AyoDishCatalog.cities;
-      const cityIndex = cities.findIndex(city => city.key === selectedCity.key);
+      const cityIndex = cities.findIndex(city => city.key === matchedCity.key);
       const nextCity = cities[(cityIndex + 1) % cities.length];
       const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
       const completedDishes = Array.isArray(savedProgress.completedDishesByCity?.[nextCity.key])
@@ -826,11 +749,11 @@
     });
 
     document.getElementById('mainMenuButton').addEventListener('click', () => {
-      window.location.href = 'index.html';
+      window.location.href = 'index.html?menu=1';
     });
 
     document.getElementById('kitchenHomeBtn').addEventListener('click', () => {
-      window.location.href = 'index.html';
+      window.location.href = 'index.html?menu=1';
     });
   </script>
   <script src="loading-screen.js"></script>
