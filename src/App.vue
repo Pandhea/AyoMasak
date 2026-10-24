@@ -12,10 +12,12 @@ const pageByPath = {
 };
 
 const page = ref(pageByPath[window.location.pathname] || 'home');
+const routeKey = ref(`${window.location.pathname}${window.location.search}`);
 const storageError = ref('');
 
 function handleHistoryNavigation() {
   page.value = pageByPath[window.location.pathname] || 'home';
+  routeKey.value = `${window.location.pathname}${window.location.search}`;
 }
 
 function navigateTo(url) {
@@ -47,7 +49,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <LegacyPage :key="page" :page="page" />
+  <LegacyPage :key="routeKey" :page="page" />
   <p v-if="storageError" class="application-storage-error" role="alert">
     {{ storageError }}
   </p>

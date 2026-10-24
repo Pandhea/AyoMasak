@@ -1774,3 +1774,11 @@ window.AyoDishCatalog = {
     }
   ]
 };
+
+for (const city of window.AyoDishCatalog.cities) {
+  for (const dish of city.dishes) {
+    if (!dish.image) {
+      dish.image = `assets/dishes/${city.key}/${dish.id}.png`;
+    }
+  }
+}

@@ -268,7 +268,22 @@
     ];
 
     const defaultSave = { completedRegions: [], cookingStamps: [], cookingStampEmojis: {}, completedDishesByCity: {}, stars: 0 };
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || JSON.stringify(defaultSave));
+    function loadProgress() {
+      const storedProgress = window.AyoStorage?.getItem(STORAGE_KEY) ??
+        localStorage.getItem(STORAGE_KEY);
+      if (!storedProgress) return { ...defaultSave };
+      try {
+        const progress = JSON.parse(storedProgress);
+        return progress && typeof progress === 'object' && !Array.isArray(progress)
+          ? { ...defaultSave, ...progress }
+          : { ...defaultSave };
+      } catch (error) {
+        console.warn('Progres permainan tidak valid; menggunakan progres kosong.', error);
+        return { ...defaultSave };
+      }
+    }
+
+    const saved = loadProgress();
     const state = {
       region: 'jakarta',
       step: 0,
@@ -680,16 +695,17 @@
               ? `${dish.dish} sudah terbuka`
               : `Masakan ${index + 1} terkunci`);
 
-            const image = dish.image ? document.createElement('img') : document.createElement('span');
-            image.className = `region-dish-index__silhouette${dish.image ? '' : ' region-dish-index__emoji'}`;
-            if (dish.image) {
-              image.src = dish.image;
-              image.alt = '';
-              image.loading = 'lazy';
-            } else {
-              image.textContent = dish.emoji;
-              image.setAttribute('aria-hidden', 'true');
-            }
+            const image = document.createElement('img');
+            image.className = 'region-dish-index__silhouette';
+            image.src = dish.image;
+            image.alt = dish.dish;
+            image.loading = 'lazy';
+            image.onerror = () => {
+              const fallback = document.createElement('span');
+              fallback.className = 'region-dish-index__photo-fallback';
+              fallback.textContent = dish.dish;
+              image.replaceWith(fallback);
+            };
 
             const lock = document.createElement('span');
             lock.className = 'region-dish-index__lock';
@@ -737,13 +753,18 @@
     window.addEventListener('resize', layoutDesktopRegionCards);
 
     function persistProgress() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      const serializedProgress = JSON.stringify({
         completedRegions: [...state.completedRegions],
         cookingStamps: [...state.cookingStamps],
         cookingStampEmojis: state.cookingStampEmojis,
         completedDishesByCity: state.completedDishesByCity,
         stars: state.stars
-      }));
+      });
+      if (window.AyoStorage) {
+        window.AyoStorage.setItem(STORAGE_KEY, serializedProgress);
+      } else {
+        localStorage.setItem(STORAGE_KEY, serializedProgress);
+      }
     }
 
     function getUnlockedDishes() {

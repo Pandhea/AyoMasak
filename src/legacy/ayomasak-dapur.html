@@ -67,7 +67,8 @@
     </button>
 
     <p class="cook-feedback" id="cookFeedback" aria-live="polite"></p>
-    <section class="story-scroll" id="storyScroll" hidden aria-labelledby="storyTitle">
+    <section class="story-scroll" id="storyScroll" hidden role="dialog" aria-modal="true"
+             aria-labelledby="storyTitle">
       <div class="story-scroll__roller" aria-hidden="true"></div>
       <div class="story-scroll__paper" tabindex="0" role="region" aria-label="Cerita masakan, dapat digulir">
         <div class="story-scroll__content">
@@ -84,9 +85,17 @@
             <img class="story-scroll__dish-photo" id="storyDishPhoto" alt="" hidden>
             <span class="story-scroll__dish-placeholder" id="storyDishPlaceholder" aria-hidden="true"></span>
           </div>
-          <span class="story-scroll__eyebrow">Cerita di balik hidangan</span>
           <h2 class="story-scroll__title" id="storyTitle"></h2>
-          <p class="story-scroll__text" id="storyText"></p>
+          <div class="story-scroll__details">
+            <section class="story-scroll__section" aria-labelledby="storyTextTitle">
+              <h3 class="story-scroll__section-title" id="storyTextTitle">Cerita di balik hidangan</h3>
+              <p class="story-scroll__text" id="storyText"></p>
+            </section>
+            <section class="story-scroll__section" aria-labelledby="storyInstructionsTitle">
+              <h3 class="story-scroll__section-title" id="storyInstructionsTitle">Resep asli (cara masak)</h3>
+              <p class="story-scroll__instructions" id="storyInstructions"></p>
+            </section>
+          </div>
         </div>
       </div>
     </section>
@@ -104,6 +113,24 @@
           <p class="recipe-hint__intro" id="recipeHintIntro">Bahan yang diperlukan:</p>
           <ul class="recipe-hint__list" id="recipeHintIngredients"></ul>
         </div>
+      </div>
+    </section>
+    <section class="kitchen-dish-book" id="kitchenDishBook" hidden
+             role="dialog" aria-modal="true" aria-labelledby="kitchenDishBookTitle">
+      <div class="kitchen-dish-book__panel">
+        <button class="kitchen-dish-book__close" id="kitchenDishBookClose" type="button"
+                aria-label="Tutup indeks masakan">×</button>
+        <h2 class="kitchen-dish-book__title" id="kitchenDishBookTitle"></h2>
+        <ol class="kitchen-dish-book__list" id="kitchenDishBookList"></ol>
+      </div>
+    </section>
+    <section class="kitchen-recipe-method" id="kitchenRecipeMethod" hidden
+             role="dialog" aria-modal="true" aria-labelledby="kitchenRecipeMethodTitle">
+      <div class="kitchen-recipe-method__panel">
+        <button class="kitchen-dish-book__close" id="kitchenRecipeMethodClose" type="button"
+                aria-label="Tutup cara memasak">×</button>
+        <h2 class="kitchen-recipe-method__title" id="kitchenRecipeMethodTitle">Cara memasak</h2>
+        <p class="kitchen-recipe-method__instructions" id="kitchenRecipeMethodInstructions"></p>
       </div>
     </section>
     <aside class="stamp-reward" id="stampReward" hidden aria-live="polite">
@@ -136,12 +163,20 @@
         </span>
       </button>
 
+      <button class="tile-button tile-button--index" id="kitchenDishBookButton" type="button"
+              aria-label="Buka indeks masakan daerah" aria-haspopup="dialog" aria-controls="kitchenDishBook">
+        <span class="button-art" aria-hidden="true">
+          <img class="button-art__face" src="assets/new_button/Property 1=Default-2.png" alt="" draggable="false">
+        </span>
+      </button>
+
     </header>
 
   </main>
   <script src="audio.js"></script>
   <script src="recipe-catalog.js"></script>
   <script>
+    const progressStorageKey = 'ayoMasakProgress';
     const selectedRegion = new URLSearchParams(window.location.search).get('region');
     const selectedDish = new URLSearchParams(window.location.search).get('dish');
     const selectedCity = window.AyoDishCatalog.cities.find(city => city.key === selectedRegion);
@@ -186,6 +221,7 @@
     const cookFeedback = document.getElementById('cookFeedback');
     const cookButton = document.getElementById('cookButton');
     const storyScroll = document.getElementById('storyScroll');
+    const storyScrollParent = storyScroll.parentElement;
     const storyPaper = storyScroll.querySelector('.story-scroll__paper');
     const recipeHint = document.getElementById('recipeHint');
     const recipeHintPaper = recipeHint.querySelector('.story-scroll__paper');
@@ -193,6 +229,15 @@
     const recipeHintCloseButton = document.getElementById('recipeHintClose');
     const recipeHintIngredients = document.getElementById('recipeHintIngredients');
     const recipeHintIntro = document.getElementById('recipeHintIntro');
+    const kitchenDishBook = document.getElementById('kitchenDishBook');
+    const kitchenDishBookButton = document.getElementById('kitchenDishBookButton');
+    const kitchenDishBookClose = document.getElementById('kitchenDishBookClose');
+    const kitchenDishBookList = document.getElementById('kitchenDishBookList');
+    const kitchenDishBookTitle = document.getElementById('kitchenDishBookTitle');
+    const kitchenRecipeMethod = document.getElementById('kitchenRecipeMethod');
+    const kitchenRecipeMethodClose = document.getElementById('kitchenRecipeMethodClose');
+    const kitchenRecipeMethodInstructions = document.getElementById('kitchenRecipeMethodInstructions');
+    let activeLockedDishButton = null;
     const stampReward = document.getElementById('stampReward');
     const continueButton = document.getElementById('continueCookingButton');
     let storyCloseTimer = null;
@@ -203,6 +248,7 @@
     let isFailed = false;
     let cookingTimer = null;
     let guidedDish = catalogDish;
+    let stampAwardedOnCurrentCook = false;
 
     const regionalIngredientNames = selectedCity.dishes.flatMap(dish => dish.ingredients);
     if (selectedCity.dishes.length !== 3 ||
@@ -231,7 +277,9 @@
 
     function getCompletedDishIds() {
       try {
-        const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}');
+        const savedValue = window.AyoStorage?.getItem(progressStorageKey) ??
+          localStorage.getItem(progressStorageKey);
+        const savedProgress = savedValue ? JSON.parse(savedValue) : {};
         const completedDishes = savedProgress.completedDishesByCity?.[selectedCity.key];
         return Array.isArray(completedDishes) ? completedDishes : [];
       } catch (error) {
@@ -239,6 +287,128 @@
         return [];
       }
     }
+
+    function getSavedProgress() {
+      try {
+        const savedValue = window.AyoStorage?.getItem(progressStorageKey) ??
+          localStorage.getItem(progressStorageKey);
+        const savedProgress = savedValue ? JSON.parse(savedValue) : {};
+        return savedProgress && typeof savedProgress === 'object' && !Array.isArray(savedProgress)
+          ? savedProgress
+          : {};
+      } catch (error) {
+        console.warn('Progres masakan tidak dapat dibaca.', error);
+        return {};
+      }
+    }
+
+    function saveProgress(progress) {
+      const serializedProgress = JSON.stringify(progress);
+      if (window.AyoStorage) {
+        window.AyoStorage.setItem(progressStorageKey, serializedProgress);
+      } else {
+        localStorage.setItem(progressStorageKey, serializedProgress);
+      }
+    }
+
+    function renderKitchenDishIndex() {
+      const completedDishes = new Set(getCompletedDishIds());
+      kitchenDishBookTitle.textContent = `Indeks Masakan ${selectedCity.name}`;
+      kitchenDishBookList.replaceChildren();
+
+      selectedCity.dishes.forEach((dish, index) => {
+        const isUnlocked = completedDishes.has(dish.id);
+        const item = document.createElement('li');
+        item.className = 'kitchen-dish-book__item';
+        item.classList.toggle('is-unlocked', isUnlocked);
+        item.setAttribute('aria-label', isUnlocked ? dish.dish : `Masakan ${index + 1} terkunci`);
+
+        const image = document.createElement('img');
+        image.className = 'kitchen-dish-book__image';
+        image.src = dish.image;
+        image.alt = '';
+        image.draggable = false;
+        image.setAttribute('aria-hidden', 'true');
+        image.onerror = () => {
+          image.hidden = true;
+          fallback.hidden = false;
+        };
+
+        const fallback = document.createElement('span');
+        fallback.className = 'kitchen-dish-book__fallback';
+        fallback.textContent = dish.dish;
+        fallback.setAttribute('aria-hidden', 'true');
+        fallback.hidden = true;
+
+        const number = document.createElement('span');
+        number.className = 'kitchen-dish-book__number';
+        number.textContent = String(index + 1);
+        number.setAttribute('aria-hidden', 'true');
+
+        if (!isUnlocked) {
+          const methodButton = document.createElement('button');
+          methodButton.className = 'kitchen-dish-book__locked-button';
+          methodButton.type = 'button';
+          methodButton.setAttribute('aria-label', `Lihat cara memasak masakan ${index + 1}`);
+          methodButton.addEventListener('click', () => {
+            activeLockedDishButton = methodButton;
+            kitchenRecipeMethodInstructions.textContent =
+              dish.instructions || 'Cara memasak masakan ini belum tersedia.';
+            kitchenRecipeMethod.hidden = false;
+            kitchenRecipeMethodClose.focus();
+          });
+
+          const lock = document.createElement('span');
+          lock.className = 'kitchen-dish-book__lock';
+          lock.textContent = '🔒';
+          lock.setAttribute('aria-hidden', 'true');
+          methodButton.append(image, fallback, lock, number);
+          item.appendChild(methodButton);
+        } else {
+          const name = document.createElement('span');
+          name.className = 'kitchen-dish-book__name';
+          name.textContent = dish.dish;
+          item.append(image, fallback, name, number);
+        }
+        kitchenDishBookList.appendChild(item);
+      });
+    }
+
+    function closeKitchenDishBook() {
+      if (kitchenDishBook.hidden) return;
+      if (!kitchenRecipeMethod.hidden) closeKitchenRecipeMethod();
+      kitchenDishBook.hidden = true;
+      kitchenDishBookButton.focus();
+    }
+
+    function closeKitchenRecipeMethod() {
+      if (kitchenRecipeMethod.hidden) return;
+      kitchenRecipeMethod.hidden = true;
+      activeLockedDishButton?.focus();
+      activeLockedDishButton = null;
+    }
+
+    kitchenDishBookButton.addEventListener('click', () => {
+      renderKitchenDishIndex();
+      kitchenDishBook.hidden = false;
+      kitchenDishBookClose.focus();
+    });
+    kitchenDishBookClose.addEventListener('click', closeKitchenDishBook);
+    kitchenDishBook.addEventListener('click', event => {
+      if (event.target === kitchenDishBook) closeKitchenDishBook();
+    });
+    kitchenRecipeMethodClose.addEventListener('click', closeKitchenRecipeMethod);
+    kitchenRecipeMethod.addEventListener('click', event => {
+      if (event.target === kitchenRecipeMethod) closeKitchenRecipeMethod();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      if (!kitchenRecipeMethod.hidden) {
+        closeKitchenRecipeMethod();
+      } else if (!kitchenDishBook.hidden) {
+        closeKitchenDishBook();
+      }
+    });
 
     function getSuggestedDish() {
       const completedDishes = getCompletedDishIds();
@@ -299,10 +469,10 @@
     function renderPan() {
       panItems.replaceChildren();
       if (isCooked) {
-        const finishedDish = document.createElement('span');
+        const finishedDish = document.createElement('img');
         finishedDish.className = 'pan-result';
-        finishedDish.textContent = matchedDish?.emoji || recipe.emoji;
-        finishedDish.setAttribute('aria-label', matchedDish?.dish || recipe.dish);
+        finishedDish.src = matchedDish?.image || recipe.image;
+        finishedDish.alt = matchedDish?.dish || recipe.dish;
         panItems.appendChild(finishedDish);
         return;
       }
@@ -433,6 +603,7 @@
       });
       ingredientGrid.appendChild(button);
     });
+    renderKitchenDishIndex();
 
     document.addEventListener('pointermove', event => {
       if (!activeDrag || event.pointerId !== activeDrag.pointerId) return;
@@ -443,10 +614,9 @@
 
     function showCookingStampReward() {
       if (!matchedDish || !matchedCity) return false;
-      const storageKey = 'ayoMasakProgress';
-      const savedProgress = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+      const savedProgress = getSavedProgress();
       const cookingStamps = Array.isArray(savedProgress.cookingStamps)
-        ? savedProgress.cookingStamps
+        ? [...savedProgress.cookingStamps]
         : [];
       const completedDishesByCity = savedProgress.completedDishesByCity &&
         typeof savedProgress.completedDishesByCity === 'object'
@@ -462,14 +632,14 @@
       const totalDishes = matchedCity.dishes.length;
       const completedCount = matchedCity.dishes.filter(dish => completedDishes.includes(dish.id)).length;
       const cityComplete = completedCount === totalDishes;
-      const isNewStamp = cityComplete && !cookingStamps.includes(matchedCity.key);
+      const isNewStamp = cityComplete && stampAwardedOnCurrentCook;
       if (cityComplete && !cookingStamps.includes(matchedCity.key)) cookingStamps.push(matchedCity.key);
 
-      localStorage.setItem(storageKey, JSON.stringify({
+      saveProgress({
         ...savedProgress,
         completedDishesByCity,
         cookingStamps
-      }));
+      });
 
       const rewardEmoji = document.getElementById('stampRewardEmoji');
       const rewardImage = document.getElementById('stampRewardImage');
@@ -499,12 +669,13 @@
       stampReward.classList.toggle('has-actions', cityComplete);
       document.getElementById('stampRewardDismiss').hidden = cityComplete;
       requestAnimationFrame(() => stampReward.classList.add('is-visible'));
+      stampAwardedOnCurrentCook = false;
       return cityComplete;
     }
 
     function saveDiscoveredDish() {
       if (!matchedDish || !matchedCity) return;
-      const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
+      const savedProgress = getSavedProgress();
       const completedDishesByCity = savedProgress.completedDishesByCity &&
         typeof savedProgress.completedDishesByCity === 'object'
         ? { ...savedProgress.completedDishesByCity }
@@ -516,11 +687,29 @@
       if (isNewDish) cityDishes.push(matchedDish.id);
       completedDishesByCity[matchedCity.key] = cityDishes;
       const stars = Number(savedProgress.stars || 0) + (isNewDish ? 1 : 0);
-      localStorage.setItem('ayoMasakProgress', JSON.stringify({
+      const totalCompleted = matchedCity.dishes.filter(dish => cityDishes.includes(dish.id)).length;
+      const cityComplete = totalCompleted === matchedCity.dishes.length;
+      const cookingStamps = Array.isArray(savedProgress.cookingStamps)
+        ? [...savedProgress.cookingStamps]
+        : [];
+      stampAwardedOnCurrentCook = cityComplete && !cookingStamps.includes(matchedCity.key);
+      if (cityComplete && !cookingStamps.includes(matchedCity.key)) {
+        cookingStamps.push(matchedCity.key);
+      }
+      const completedRegions = Array.isArray(savedProgress.completedRegions)
+        ? [...savedProgress.completedRegions]
+        : [];
+      if (cityComplete && !completedRegions.includes(matchedCity.key)) {
+        completedRegions.push(matchedCity.key);
+      }
+      saveProgress({
         ...savedProgress,
         completedDishesByCity,
+        cookingStamps,
+        completedRegions,
         stars
-      }));
+      });
+      renderKitchenDishIndex();
     }
 
     function finishStoryClose() {
@@ -528,6 +717,7 @@
       window.clearTimeout(storyCloseTimer);
       storyScroll.hidden = true;
       storyScroll.classList.remove('is-closing', 'is-fullscreen');
+      storyScrollParent.appendChild(storyScroll);
       const cityComplete = showCookingStampReward();
       cookButton.hidden = true;
       continueButton.hidden = cityComplete;
@@ -667,10 +857,12 @@
       cookFeedback.textContent = `Matang! ${cookedDish.dish} terbuka dan masuk ke koleksi daerah.`;
       document.getElementById('storyTitle').textContent = cookedDish.dish;
       document.getElementById('storyText').textContent = cookedDish.story || backstories[cookedDish.dish] || '';
+      document.getElementById('storyInstructions').textContent =
+        cookedDish.instructions || 'Resep asli belum tersedia untuk masakan ini.';
       document.getElementById('storyDishImage').setAttribute('aria-label', `Ilustrasi ${cookedDish.dish}`);
       const storyDishPhoto = document.getElementById('storyDishPhoto');
       const storyDishPlaceholder = document.getElementById('storyDishPlaceholder');
-      storyDishPlaceholder.textContent = cookedDish.emoji;
+      storyDishPlaceholder.textContent = cookedDish.dish;
       const imagePath = cookedDish.image || '';
       if (imagePath) {
         storyDishPhoto.src = imagePath;
@@ -764,25 +956,16 @@
 
     continueButton.addEventListener('click', () => {
       if (!isCooked || !storyScroll.hidden) return;
-      if (!selectedDish) {
-        window.AyoNavigate('index.html');
-        return;
+      const completedDishes = getCompletedDishIds();
+      const nextDish = selectedCity.dishes.find(dish => !completedDishes.includes(dish.id));
+      if (!nextDish) return;
+      const query = new URLSearchParams({ region: selectedCity.key, dish: nextDish.id });
+      const nextUrl = `ayomasak-dapur.html?${query.toString()}`;
+      if (window.AyoNavigate) {
+        window.AyoNavigate(nextUrl);
+      } else {
+        window.location.href = nextUrl;
       }
-      if (catalogDish && selectedCity) {
-        const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
-        const completedDishes = Array.isArray(savedProgress.completedDishesByCity?.[selectedCity.key])
-          ? savedProgress.completedDishesByCity[selectedCity.key]
-          : [];
-        const nextDish = selectedCity.dishes.find(dish => !completedDishes.includes(dish.id));
-        if (!nextDish) {
-          window.location.href = 'ayomasak-index-masakan.html';
-          return;
-        }
-        const query = new URLSearchParams({ region: selectedCity.key, dish: nextDish.id });
-        window.location.href = `ayomasak-dapur.html?${query.toString()}`;
-        return;
-      }
-
     });
 
     document.getElementById('nextCityButton').addEventListener('click', () => {
@@ -790,13 +973,18 @@
       const cities = window.AyoDishCatalog.cities;
       const cityIndex = cities.findIndex(city => city.key === matchedCity.key);
       const nextCity = cities[(cityIndex + 1) % cities.length];
-      const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}') || {};
+      const savedProgress = getSavedProgress();
       const completedDishes = Array.isArray(savedProgress.completedDishesByCity?.[nextCity.key])
         ? savedProgress.completedDishesByCity[nextCity.key]
         : [];
       const nextDish = nextCity.dishes.find(dish => !completedDishes.includes(dish.id)) || nextCity.dishes[0];
       const query = new URLSearchParams({ region: nextCity.key, dish: nextDish.id });
-      window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+      const nextUrl = `ayomasak-dapur.html?${query.toString()}`;
+      if (window.AyoNavigate) {
+        window.AyoNavigate(nextUrl);
+      } else {
+        window.location.href = nextUrl;
+      }
     });
 
     document.getElementById('mainMenuButton').addEventListener('click', () => {

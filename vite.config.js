@@ -7,6 +7,7 @@ import vue from '@vitejs/plugin-vue';
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 const legacyAssetFolders = [
   'Buttons',
+  'dishes',
   'Jawa',
   'Stample',
   'logo',

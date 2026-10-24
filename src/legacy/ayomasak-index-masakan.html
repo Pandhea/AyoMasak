@@ -80,7 +80,7 @@
         <button class="dish-story__close" id="dishStoryClose" type="button" aria-label="Tutup cerita masakan">×</button>
         <span class="dish-story__eyebrow" id="dishStoryCity"></span>
         <img class="dish-story__image" id="dishStoryImage" alt="" hidden>
-        <span class="dish-story__emoji" id="dishStoryEmoji" aria-hidden="true"></span>
+        <span class="dish-story__fallback" id="dishStoryFallback" aria-hidden="true"></span>
         <span class="dish-story__eyebrow">Cerita di balik hidangan</span>
         <h2 class="dish-story__title" id="dishStoryTitle"></h2>
         <div class="dish-story__ingredients" id="dishStoryIngredientsContainer">
@@ -88,6 +88,10 @@
           <span id="dishStoryIngredients"></span>
         </div>
         <p class="dish-story__text" id="dishStoryText"></p>
+        <section class="dish-story__method" id="dishStoryMethodContainer" hidden>
+          <h3 class="dish-story__method-title">Cara Memasak</h3>
+          <p class="dish-story__method-text" id="dishStoryMethod"></p>
+        </section>
         <button class="modal-action-btn" id="dishStoryCookBtn" type="button">🍳 Masak di Dapur</button>
       </div>
     </section>
@@ -102,6 +106,10 @@
         <p class="dish-story__text" id="lockedModalText">
           Resep ini masih menjadi rahasia dapur! Masaklah di dapur daerah ini untuk mengungkap hidangan lezat dan mengoleksi stempel resminya.
         </p>
+        <section class="dish-story__method" id="lockedModalMethodContainer" hidden>
+          <h3 class="dish-story__method-title">Cara Memasak</h3>
+          <p class="dish-story__method-text" id="lockedModalMethod"></p>
+        </section>
         <button class="modal-action-btn" id="lockedModalCookBtn" type="button">🍳 Masak di Dapur</button>
       </div>
     </section>
@@ -158,9 +166,11 @@
 
     function getSavedProgress() {
       try {
-        const raw = localStorage.getItem('ayoMasakProgress');
+        const raw = window.AyoStorage?.getItem('ayoMasakProgress') ??
+          localStorage.getItem('ayoMasakProgress');
         return raw ? JSON.parse(raw) : {};
-      } catch (e) {
+      } catch (error) {
+        console.warn('Progres buku indeks tidak dapat dibaca.', error);
         return {};
       }
     }
@@ -184,18 +194,20 @@
       currentActiveDish = dish;
 
       const image = document.getElementById('dishStoryImage');
-      const emoji = document.getElementById('dishStoryEmoji');
+      const fallback = document.getElementById('dishStoryFallback');
       const imagePath = dish.image || '';
 
       document.getElementById('dishStoryCity').textContent = `${region.name} • ${region.city}`;
       document.getElementById('dishStoryTitle').textContent = dish.dish;
       document.getElementById('dishStoryText').textContent = dish.story;
+      document.getElementById('dishStoryMethod').textContent = dish.instructions || '';
+      document.getElementById('dishStoryMethodContainer').hidden = !dish.instructions;
       document.getElementById('dishStoryIngredients').textContent = Array.isArray(dish.ingredients)
         ? dish.ingredients.join(', ')
         : 'Bahan khas daerah';
 
-      emoji.textContent = dish.emoji || '🍲';
-      emoji.hidden = Boolean(imagePath);
+      fallback.textContent = dish.dish;
+      fallback.hidden = Boolean(imagePath);
       image.hidden = !imagePath;
 
       if (imagePath) {
@@ -204,7 +216,7 @@
       }
       image.onerror = () => {
         image.hidden = true;
-        emoji.hidden = false;
+        fallback.hidden = false;
       };
 
       dishStory.hidden = false;
@@ -229,6 +241,8 @@
       document.getElementById('lockedModalTitle').textContent = 'Resep Belum Terbuka';
       document.getElementById('lockedModalText').textContent =
         `Hidangan dari ${region.name} ini masih terkunci. Mulai memasak di dapur kota ${region.city} untuk membuka resep dan stempel resminya!`;
+      document.getElementById('lockedModalMethod').textContent = dish.instructions || '';
+      document.getElementById('lockedModalMethodContainer').hidden = !dish.instructions;
 
       lockedModal.hidden = false;
       requestAnimationFrame(() => {
@@ -287,7 +301,6 @@
     function renderIndexBook() {
       const progress = getSavedProgress();
       const completedDishesByCity = progress.completedDishesByCity || {};
-      const cookingStamps = Array.isArray(progress.cookingStamps) ? progress.cookingStamps : [];
 
       let totalAllDishes = 0;
       let totalAllUnlocked = 0;
@@ -338,7 +351,7 @@
             : [];
           const totalDishes = region.dishes.length;
           const unlockedCount = region.dishes.filter(d => unlockedIds.includes(d.id)).length;
-          const isFullUnlocked = (totalDishes > 0 && unlockedCount === totalDishes) || cookingStamps.includes(region.key);
+          const isFullUnlocked = totalDishes > 0 && unlockedCount === totalDishes;
 
           wilayahTotalDishes += totalDishes;
           wilayahUnlockedDishes += unlockedCount;
@@ -446,22 +459,21 @@
             const icon = document.createElement('span');
             icon.className = 'dish-card__icon';
 
-            if (isUnlocked) {
-              if (dish.image) {
-                const photo = document.createElement('img');
-                photo.className = 'dish-card__photo';
-                photo.src = dish.image;
-                photo.alt = dish.dish;
-                photo.loading = 'lazy';
-                icon.appendChild(photo);
-              } else {
-                const emoji = document.createElement('span');
-                emoji.className = 'dish-card__emoji';
-                emoji.setAttribute('aria-hidden', 'true');
-                emoji.textContent = dish.emoji || '🍲';
-                icon.appendChild(emoji);
-              }
+            const photo = document.createElement('img');
+            photo.className = 'dish-card__photo';
+            photo.src = dish.image;
+            photo.alt = isUnlocked ? dish.dish : '';
+            photo.loading = 'lazy';
+            photo.onerror = () => {
+              photo.hidden = true;
+              const fallback = document.createElement('span');
+              fallback.className = 'dish-card__photo-fallback';
+              fallback.textContent = dish.dish;
+              icon.appendChild(fallback);
+            };
+            icon.appendChild(photo);
 
+            if (isUnlocked) {
               const badge = document.createElement('span');
               badge.className = 'dish-card__badge-unlocked';
               badge.setAttribute('aria-hidden', 'true');
