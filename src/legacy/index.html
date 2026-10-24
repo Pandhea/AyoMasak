@@ -16,20 +16,20 @@
   <div class="game-loading-screen is-waiting" id="gameLoadingScreen" role="status" aria-live="polite">
     <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
     <div class="game-loading-track" aria-hidden="true"><span></span></div>
-    <img class="startup-partner-logo" src="assets/logo/munas-permikomnas.png" alt="Munas Permikomnas">
+    <div class="startup-partner-logos" aria-label="Didukung oleh Munas Permikomnas dan Universitas Sains Al-Qur'an">
+      <img class="startup-partner-logo startup-partner-logo--munas" src="assets/logo/munas-permikomnas.png" alt="Munas Permikomnas">
+      <img class="startup-partner-logo startup-partner-logo--unsiq" src="assets/logo/unsiq-jateng.png" alt="Universitas Sains Al-Qur'an Wonosobo">
+    </div>
   </div>
   <section class="idle-start-screen" id="idleStartScreen" aria-label="Mulai AyoMasak">
-    <button class="idle-start-settings" type="button" aria-label="Pengaturan">
-      <span class="button-art" aria-hidden="true">
-        <img class="button-art__face" src="assets/Buttons/button-settings-face.png" alt="" draggable="false">
-        <img class="button-art__frame" src="assets/Buttons/button-settings-frame.png" alt="" draggable="false">
-      </span>
-    </button>
     <div class="idle-start-content">
       <img class="idle-start-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!">
       <p class="idle-start-prompt" id="idleStartPrompt">Click anywhere to start</p>
     </div>
-    <img class="startup-partner-logo" src="assets/logo/munas-permikomnas.png" alt="Munas Permikomnas">
+    <div class="startup-partner-logos" aria-label="Didukung oleh Munas Permikomnas dan Universitas Sains Al-Qur'an">
+      <img class="startup-partner-logo startup-partner-logo--munas" src="assets/logo/munas-permikomnas.png" alt="Munas Permikomnas">
+      <img class="startup-partner-logo startup-partner-logo--unsiq" src="assets/logo/unsiq-jateng.png" alt="Universitas Sains Al-Qur'an Wonosobo">
+    </div>
   </section>
   <div class="app">
     <section class="screen map-screen active" id="mapScreen" aria-label="Pilih daerah untuk memasak">
@@ -631,7 +631,7 @@
       cookButton.className = 'region-dropdown__cook';
       cookButton.textContent = 'Masak di daerah ini';
       cookButton.addEventListener('click', () => {
-        window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(button.dataset.regionKey)}`;
+        window.AyoNavigate(`ayomasak-dapur.html?region=${encodeURIComponent(button.dataset.regionKey)}`);
       });
 
       dropdown.append(closeButton, title, subtitle, dishList, cookButton);
@@ -919,13 +919,13 @@
         }
       }
       if (event.data?.type === 'start-cooking' && regionOrder.includes(event.data.region)) {
-        window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(event.data.region)}`;
+        window.AyoNavigate(`ayomasak-dapur.html?region=${encodeURIComponent(event.data.region)}`);
       }
       if (event.data?.type === 'start-recipe') {
         const city = window.AyoDishCatalog.cities.find(item => item.key === event.data.region);
         if (city?.dishes.some(dish => dish.id === event.data.dish)) {
           const query = new URLSearchParams({ region: city.key, dish: event.data.dish });
-          window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+          window.AyoNavigate(`ayomasak-dapur.html?${query.toString()}`);
         }
       }
     });
@@ -1122,10 +1122,6 @@
     });
 
     document.querySelector('.settings-btn').addEventListener('click', () => {
-      openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
-    });
-
-    document.querySelector('.idle-start-settings').addEventListener('click', () => {
       openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
     });
 

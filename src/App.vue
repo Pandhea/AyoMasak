@@ -18,16 +18,29 @@ function handleHistoryNavigation() {
   page.value = pageByPath[window.location.pathname] || 'home';
 }
 
+function navigateTo(url) {
+  const destination = new URL(url, window.location.href);
+  if (destination.origin !== window.location.origin) {
+    window.location.href = destination.href;
+    return;
+  }
+
+  window.history.pushState(null, '', destination.href);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
 function handleStorageError(event) {
   storageError.value = event.detail?.message || 'Perubahan data belum tersimpan.';
 }
 
 onMounted(() => {
+  window.AyoNavigate = navigateTo;
   window.addEventListener('popstate', handleHistoryNavigation);
   window.addEventListener('ayo-storage-error', handleStorageError);
 });
 
 onUnmounted(() => {
+  delete window.AyoNavigate;
   window.removeEventListener('popstate', handleHistoryNavigation);
   window.removeEventListener('ayo-storage-error', handleStorageError);
 });

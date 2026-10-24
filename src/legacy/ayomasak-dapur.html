@@ -101,7 +101,7 @@
           </button>
           <span class="story-scroll__eyebrow">Panduan memasak</span>
           <h2 class="story-scroll__title" id="recipeHintTitle"></h2>
-          <p class="recipe-hint__intro">Bahan yang diperlukan:</p>
+          <p class="recipe-hint__intro" id="recipeHintIntro">Bahan yang diperlukan:</p>
           <ul class="recipe-hint__list" id="recipeHintIngredients"></ul>
         </div>
       </div>
@@ -192,6 +192,7 @@
     const recipeHintButton = document.getElementById('recipeHintButton');
     const recipeHintCloseButton = document.getElementById('recipeHintClose');
     const recipeHintIngredients = document.getElementById('recipeHintIngredients');
+    const recipeHintIntro = document.getElementById('recipeHintIntro');
     const stampReward = document.getElementById('stampReward');
     const continueButton = document.getElementById('continueCookingButton');
     let storyCloseTimer = null;
@@ -201,6 +202,7 @@
     let isCooking = false;
     let isFailed = false;
     let cookingTimer = null;
+    let guidedDish = catalogDish;
 
     const regionalIngredientNames = selectedCity.dishes.flatMap(dish => dish.ingredients);
     if (selectedCity.dishes.length !== 3 ||
@@ -226,6 +228,56 @@
         image: `assets/resource_bahan/crops/${selectedCity.key}/${dish.id}-${index + 1}.png`
       }))
     ));
+
+    function getCompletedDishIds() {
+      try {
+        const savedProgress = JSON.parse(localStorage.getItem('ayoMasakProgress') || '{}');
+        const completedDishes = savedProgress.completedDishesByCity?.[selectedCity.key];
+        return Array.isArray(completedDishes) ? completedDishes : [];
+      } catch (error) {
+        console.warn('Progres masakan tidak dapat dibaca untuk petunjuk resep.', error);
+        return [];
+      }
+    }
+
+    function getSuggestedDish() {
+      const completedDishes = getCompletedDishIds();
+      return selectedCity.dishes.find(dish => !completedDishes.includes(dish.id)) ||
+        selectedCity.dishes[0];
+    }
+
+    function getClosestDishHint() {
+      const selectedDishIds = new Set(selectedIngredients);
+      const completedDishes = getCompletedDishIds();
+      const candidates = catalogDish ? [catalogDish] : selectedCity.dishes;
+      const rankedDishes = candidates
+        .map(dish => {
+          const ingredientIds = dish.ingredients.map((_, index) => `${dish.id}-${index + 1}`);
+          return {
+            dish,
+            ingredientIds,
+            matchedIds: ingredientIds.filter(id => selectedDishIds.has(id)),
+            isComplete: completedDishes.includes(dish.id)
+          };
+        })
+        .sort((first, second) =>
+          second.matchedIds.length - first.matchedIds.length ||
+          Number(first.isComplete) - Number(second.isComplete)
+        );
+      const closest = rankedDishes[0];
+      if (!closest) throw new Error(`Petunjuk resep untuk ${selectedCity.name} tidak tersedia.`);
+
+      const missingId = closest.ingredientIds.find(id => !selectedDishIds.has(id));
+      const incorrectId = [...selectedDishIds].find(id => !closest.ingredientIds.includes(id));
+      return {
+        dish: closest.dish,
+        matchedIngredients: closest.matchedIds
+          .map(id => availableIngredients.find(ingredient => ingredient.id === id)?.name)
+          .filter(Boolean),
+        missingIngredient: availableIngredients.find(ingredient => ingredient.id === missingId),
+        incorrectIngredient: availableIngredients.find(ingredient => ingredient.id === incorrectId)
+      };
+    }
 
     function createIngredientVisual(ingredient, className) {
       if (ingredient.image) {
@@ -487,20 +539,17 @@
     }
 
     function renderRecipeHint() {
-      document.getElementById('recipeHintTitle').textContent = recipe.dish;
+      const hintDish = catalogDish || guidedDish || getSuggestedDish();
+      document.getElementById('recipeHintTitle').textContent = hintDish.dish;
+      recipeHintIntro.textContent = catalogDish
+        ? 'Bahan yang diperlukan:'
+        : `Petunjuk resep daerah ${selectedCity.name}. Pilih bahan berikut, lalu tekan Masak!`;
       recipeHintIngredients.replaceChildren();
-      if (!catalogDish) {
-        const hint = document.createElement('li');
-        hint.className = 'recipe-hint__ingredient';
-        hint.textContent = `Pilih tepat 3 dari 9 bahan khas ${selectedCity.name}. Temukan kombinasi yang cocok untuk membuka salah satu masakannya.`;
-        recipeHintIngredients.appendChild(hint);
-        return;
-      }
-      recipe.ingredients.forEach((name, index) => {
-        const ingredientId = `${recipe.id}-${index + 1}`;
+      hintDish.ingredients.forEach((name, index) => {
+        const ingredientId = `${hintDish.id}-${index + 1}`;
         const recipeIngredient = availableIngredients.find(item => item.id === ingredientId);
         if (!recipeIngredient) {
-          throw new Error(`Slot bahan "${name}" untuk resep ${recipe.dish} tidak ditemukan.`);
+          throw new Error(`Slot bahan "${name}" untuk resep ${hintDish.dish} tidak ditemukan.`);
         }
         const item = document.createElement('li');
         item.className = 'recipe-hint__ingredient';
@@ -547,13 +596,16 @@
       if (!recipeHint.hidden) return;
       renderRecipeHint();
       recipeHint.hidden = false;
+      recipeHint.classList.add('is-open');
       requestAnimationFrame(() => {
-        recipeHint.classList.add('is-open');
         recipeHintCloseButton.focus();
         recipeHintPaper.scrollTop = 0;
       });
     });
     recipeHintCloseButton.addEventListener('click', closeRecipeHint);
+    recipeHint.addEventListener('click', event => {
+      if (event.target === recipeHint) closeRecipeHint();
+    });
     recipeHintPaper.addEventListener('transitionend', event => {
       if (event.target === recipeHintPaper && event.propertyName === 'transform') {
         finishRecipeHintClose();
@@ -695,7 +747,17 @@
         panStage.classList.add('is-failed');
         cookButton.disabled = false;
         setCookButtonLabel('Mulai Ulang');
-        cookFeedback.textContent = 'Masakan belum berhasil. Bahan atau kombinasinya kurang tepat. Tekan Mulai Ulang untuk mencoba lagi.';
+        const hint = getClosestDishHint();
+        guidedDish = hint.dish;
+        if (hint.matchedIngredients.length === 2 && hint.missingIngredient && hint.incorrectIngredient) {
+          cookFeedback.textContent = `Hampir! Dua bahan sudah cocok untuk ${hint.dish.dish}. Ganti ${hint.incorrectIngredient.name} dengan ${hint.missingIngredient.name}.`;
+        } else if (hint.matchedIngredients.length > 0) {
+          cookFeedback.textContent = `${hint.matchedIngredients[0]} cocok untuk ${hint.dish.dish}. Tekan tombol petunjuk untuk melihat bahan lainnya.`;
+        } else if (hint.missingIngredient) {
+          cookFeedback.textContent = `Kombinasi belum cocok. Coba resep ${hint.dish.dish}, mulai dengan ${hint.missingIngredient.name}.`;
+        } else {
+          cookFeedback.textContent = 'Bahan belum cocok. Buka petunjuk resep untuk melihat kombinasi yang tepat.';
+        }
         window.AyoAudio.playTone(180, 220, 0.035);
       }, 3000);
     });
@@ -703,7 +765,7 @@
     continueButton.addEventListener('click', () => {
       if (!isCooked || !storyScroll.hidden) return;
       if (!selectedDish) {
-        window.location.href = 'index.html';
+        window.AyoNavigate('index.html');
         return;
       }
       if (catalogDish && selectedCity) {
@@ -738,11 +800,11 @@
     });
 
     document.getElementById('mainMenuButton').addEventListener('click', () => {
-      window.location.href = 'index.html?menu=1';
+      window.AyoNavigate('index.html?menu=1');
     });
 
     document.getElementById('kitchenHomeBtn').addEventListener('click', () => {
-      window.location.href = 'index.html?menu=1';
+      window.AyoNavigate('index.html?menu=1');
     });
   </script>
   <script src="loading-screen.js"></script>

@@ -81,7 +81,6 @@
 
   if (idleStartScreen) {
     const handleStart = event => {
-      if (event.target.closest('.idle-start-settings')) return;
       idleStartScreen.removeEventListener('click', handleStart);
       startLoading();
     };

@@ -1,12 +1,15 @@
 (() => {
   const STORAGE_KEY = 'ayoMasakAudioSettings';
-  const DEFAULT_SETTINGS = { music: 28, effects: 70 };
+  const DEFAULT_SETTINGS = { music: 15, effects: 70 };
+  const MUSIC_FADE_DURATION = 3000;
   const musicSource = new URL('./AUD-20261024-WA0003.mp3', document.baseURI).href;
   const clickSource = new URL('./810763__mokasza__single-bubble-pop-01.mp3', document.baseURI).href;
   const embedded = window.parent !== window &&
     new URLSearchParams(window.location.search).get('embed') === '1';
-  const homePage = document.body.classList.contains('page-home');
-  const musicAudio = new Audio(musicSource);
+  const musicPage = document.body.classList.contains('page-home') ||
+    document.body.classList.contains('page-kitchen');
+  const musicAudio = window.AyoMasakMusicAudio || new Audio(musicSource);
+  window.AyoMasakMusicAudio = musicAudio;
   const clickAudio = new Audio(clickSource);
   musicAudio.loop = true;
   musicAudio.preload = 'auto';
@@ -22,7 +25,8 @@
   }
 
   function loadSettings() {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = window.AyoStorage?.getItem(STORAGE_KEY) ??
+      localStorage.getItem(STORAGE_KEY);
     if (!stored) return { ...DEFAULT_SETTINGS };
     try {
       return normalizeSettings(JSON.parse(stored));
@@ -36,9 +40,16 @@
   let context = null;
   let effectsGain = null;
   let musicStarted = false;
+  let musicFadingIn = false;
+  let musicFadeFrame = null;
 
   function saveSettings() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    const value = JSON.stringify(settings);
+    if (window.AyoStorage) {
+      window.AyoStorage.setItem(STORAGE_KEY, value);
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY, value);
   }
 
   function getAudioContext() {
@@ -54,7 +65,7 @@
   }
 
   function updateGains() {
-    musicAudio.volume = settings.music / 100;
+    if (!musicFadingIn) musicAudio.volume = settings.music / 100;
     clickAudio.volume = settings.effects / 100;
     if (context) {
       effectsGain.gain.setTargetAtTime(settings.effects / 100, context.currentTime, 0.04);
@@ -76,23 +87,53 @@
   }
 
   function startMusic() {
-    if (!homePage) return;
+    if (!musicPage) return;
     if (embedded) {
       window.parent.postMessage({ type: 'audio-start' }, window.location.origin);
       return;
     }
 
-    if (musicStarted) return;
+    if (musicStarted || !musicAudio.paused) {
+      musicStarted = true;
+      return;
+    }
     musicStarted = true;
-    musicAudio.play().catch(error => {
-      musicStarted = false;
-      if (error.name !== 'AbortError') {
-        console.error('Gagal memutar musik latar.', error);
-      }
-    });
+    musicFadingIn = true;
+    musicAudio.volume = 0;
+    musicAudio.play()
+      .then(() => {
+        if (!musicStarted) return;
+        const fadeStartedAt = performance.now();
+        const fadeIn = now => {
+          if (!musicStarted) return;
+          const progress = Math.min(1, (now - fadeStartedAt) / MUSIC_FADE_DURATION);
+          const easedProgress = progress * progress * (3 - 2 * progress);
+          musicAudio.volume = (settings.music / 100) * easedProgress;
+          if (progress < 1) {
+            musicFadeFrame = window.requestAnimationFrame(fadeIn);
+          } else {
+            musicFadeFrame = null;
+            musicFadingIn = false;
+          }
+        };
+        musicFadeFrame = window.requestAnimationFrame(fadeIn);
+      })
+      .catch(error => {
+        musicStarted = false;
+        musicFadingIn = false;
+        musicAudio.volume = settings.music / 100;
+        if (error.name !== 'AbortError') {
+          console.error('Gagal memutar musik latar.', error);
+        }
+      });
   }
 
   function stopMusic() {
+    if (musicFadeFrame !== null) {
+      window.cancelAnimationFrame(musicFadeFrame);
+      musicFadeFrame = null;
+    }
+    musicFadingIn = false;
     musicAudio.pause();
     musicAudio.currentTime = 0;
     musicStarted = false;
@@ -154,17 +195,28 @@
   }
 
   function handleStorage(event) {
-    if (event.key !== STORAGE_KEY || !event.newValue) return;
-    settings = normalizeSettings(JSON.parse(event.newValue));
+    const value = event.type === 'storage'
+      ? (event.key === STORAGE_KEY ? event.newValue : null)
+      : (event.detail?.key === STORAGE_KEY ? event.detail.value : null);
+    if (!value) return;
+    try {
+      settings = normalizeSettings(JSON.parse(value));
+    } catch (error) {
+      console.warn('Pengaturan audio tersimpan tidak valid; perubahan diabaikan.', error);
+      return;
+    }
     updateGains();
   }
 
   function dispose() {
-    stopMusic();
+    const nextPageKeepsMusic = ['/', '/index.html', '/ayomasak-dapur.html']
+      .includes(window.location.pathname);
+    if (!nextPageKeepsMusic) stopMusic();
     document.removeEventListener('click', handleDocumentClick);
     document.removeEventListener('pointerdown', startMusic, true);
     document.removeEventListener('keydown', startMusic, true);
     window.removeEventListener('storage', handleStorage);
+    window.removeEventListener('ayo-storage-change', handleStorage);
   }
 
   window.AyoAudio = {
@@ -179,9 +231,10 @@
 
   document.addEventListener('click', handleDocumentClick);
 
-  if (!embedded && homePage) {
+  if (!embedded && musicPage) {
     document.addEventListener('pointerdown', startMusic, { once: true, capture: true });
     document.addEventListener('keydown', startMusic, { once: true, capture: true });
   }
-  if (!embedded) window.addEventListener('storage', handleStorage);
+  window.addEventListener('storage', handleStorage);
+  window.addEventListener('ayo-storage-change', handleStorage);
 })();

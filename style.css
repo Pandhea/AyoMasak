@@ -22,19 +22,32 @@
   transition: opacity .38s ease, visibility .38s ease;
 }
 
-.startup-partner-logo{
+.startup-partner-logos{
   position: absolute;
   z-index: 2;
   bottom: max(20px, env(safe-area-inset-bottom));
   left: 50%;
-  display: block;
-  width: clamp(180px, 24vw, 300px);
-  height: auto;
-  max-height: 16vh;
+  display: flex;
+  width: min(520px, calc(100vw - 40px));
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 32px);
   object-fit: contain;
   transform: translateX(-50%);
-  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, .5));
   pointer-events: none;
+}
+
+.startup-partner-logo{
+  display: block;
+  width: min(44%, 240px);
+  height: clamp(56px, 10vh, 96px);
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(255, 255, 255, .5));
+}
+
+.startup-partner-logo--unsiq{
+  width: min(30%, 150px);
+  height: clamp(58px, 11vh, 104px);
 }
 
 
@@ -227,8 +240,8 @@ body.page-home .idle-start-screen:not(.is-hidden) ~ .app .destination-sheet{
 }
 
 .idle-start-settings:active .button-art__face{
-  transform: translateY(8px);
-  filter: brightness(.96);
+  transform: none;
+  filter: none;
 }
 
 .idle-start-spark{
@@ -1188,7 +1201,11 @@ body.page-home .menu-btn{
       filter: none;
     }
 
-    body.page-home button.settings-btn:active .button-art__face,
+    body.page-home button.settings-btn:active .button-art__face{
+      transform: none;
+      filter: none;
+    }
+
     body.page-home button.menu-btn:active .button-art__face{
       transform: translateY(var(--button-press-depth));
       filter: brightness(.96);
@@ -1955,6 +1972,7 @@ body.page-kitchen{
       left: 0;
       right: 0;
       height: 0;
+      z-index: 6;
     }
 
     body.page-kitchen :focus-visible{
@@ -5595,16 +5613,15 @@ body.page-settings{
       font-family: var(--font-family-display);
       font-size: 15px;
       font-weight: 400;
+      transition: box-shadow .16s ease;
     }
 
     body.page-settings .confirm-button:hover{
-      transform: translate(-50%, -2px);
-      box-shadow: 0 7px 0 #47752a, 0 10px 17px rgba(75, 49, 18, .23);
+      transform: translateX(-50%);
     }
 
     body.page-settings .confirm-button:active{
-      transform: translate(-50%, 3px);
-      box-shadow: 0 2px 0 #47752a;
+      transform: translateX(-50%);
     }
 
     body.page-settings .confirm-button__well{
