@@ -153,7 +153,8 @@
       </button>
 
       <button class="tile-button tile-button--index" id="kitchenDishBookButton" type="button"
-              aria-label="Buka indeks masakan daerah" aria-haspopup="dialog" aria-controls="kitchenDishBook">
+              aria-label="Buka indeks masakan daerah" aria-haspopup="dialog"
+              aria-controls="kitchenDishBook kitchenIndexMenu" aria-expanded="false">
         <span class="button-art" aria-hidden="true">
           <img class="button-art__face" src="assets/new_button/Property 1=Default-2.png" alt="" draggable="false">
         </span>
@@ -162,6 +163,16 @@
     </header>
 
   </main>
+  <aside class="kitchen-map-menu" id="kitchenMapMenu" aria-label="Pindah daerah">
+    <label class="kitchen-map-menu__search-label" for="kitchenMapSearch">Cari daerah</label>
+    <input class="kitchen-map-menu__search" id="kitchenMapSearch" type="search"
+           placeholder="Cari daerah..." autocomplete="off">
+    <p class="kitchen-map-menu__empty" id="kitchenMapEmpty" role="status" hidden>Daerah tidak ditemukan.</p>
+    <div class="kitchen-map-menu__regions" id="kitchenMapRegions"></div>
+  </aside>
+  <aside class="kitchen-index-menu" id="kitchenIndexMenu" aria-label="Buku Indeks Masakan">
+    <iframe class="kitchen-index-menu__frame" id="kitchenIndexFrame" title="Buku Indeks Masakan"></iframe>
+  </aside>
   <script src="audio.js"></script>
   <script src="recipe-catalog.js"></script>
   <script>
@@ -234,6 +245,124 @@
     let cookingTimer = null;
     let guidedDish = catalogDish;
     let stampAwardedOnCurrentCook = false;
+    const kitchenMapRegions = document.getElementById('kitchenMapRegions');
+    const kitchenMapSearch = document.getElementById('kitchenMapSearch');
+    const kitchenMapEmpty = document.getElementById('kitchenMapEmpty');
+    const kitchenIndexMenu = document.getElementById('kitchenIndexMenu');
+    const kitchenIndexFrame = document.getElementById('kitchenIndexFrame');
+    let expandedMapEntry = null;
+
+    function loadKitchenIndex() {
+      if (!kitchenIndexFrame.hasAttribute('src')) {
+        kitchenIndexFrame.src = 'ayomasak-index-masakan.html?embed=1&sidebar=1';
+      }
+      if (!kitchenIndexMenu.hidden) {
+        kitchenDishBookButton.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    if (window.matchMedia('(min-width: 1025px)').matches) loadKitchenIndex();
+
+    const kitchenDesktopQuery = window.matchMedia('(min-width: 1025px)');
+    kitchenDesktopQuery.addEventListener('change', event => {
+      if (event.matches) loadKitchenIndex();
+    });
+
+    function renderKitchenMapRegions(query = '') {
+      const normalizedQuery = query.trim().toLocaleLowerCase('id');
+      const cities = [...window.AyoDishCatalog.cities]
+        .sort((first, second) => first.name.localeCompare(second.name, 'id'));
+      kitchenMapRegions.replaceChildren();
+
+      let visibleCount = 0;
+      cities.forEach(city => {
+        if (!`${city.name} ${city.city}`.toLocaleLowerCase('id').includes(normalizedQuery)) return;
+        visibleCount += 1;
+
+        const entry = document.createElement('div');
+        entry.className = 'kitchen-map-menu__entry';
+        if (expandedMapEntry === city.key) entry.classList.add('is-expanded');
+
+        const button = document.createElement('button');
+        button.className = 'kitchen-map-menu__region';
+        button.type = 'button';
+        button.dataset.regionKey = city.key;
+        button.setAttribute('aria-label', `Lihat pilihan masakan ${city.name}`);
+        button.setAttribute('aria-expanded', String(expandedMapEntry === city.key));
+        button.setAttribute('aria-controls', `kitchenMapDropdown-${city.key}`);
+        if (city.key === selectedCity.key) button.setAttribute('aria-current', 'location');
+
+        const image = document.createElement('img');
+        image.src = city.frame;
+        image.alt = '';
+        image.draggable = false;
+
+        const name = document.createElement('span');
+        name.textContent = city.name;
+        button.append(image, name);
+        button.addEventListener('click', () => {
+          expandedMapEntry = expandedMapEntry === city.key ? null : city.key;
+          renderKitchenMapRegions(kitchenMapSearch.value);
+          kitchenMapRegions.querySelector(`[data-region-key="${city.key}"]`)?.focus();
+        });
+
+        entry.appendChild(button);
+        if (expandedMapEntry === city.key) {
+          const dropdown = document.createElement('section');
+          dropdown.className = 'kitchen-map-menu__dropdown';
+          dropdown.id = `kitchenMapDropdown-${city.key}`;
+          dropdown.setAttribute('aria-label', `Pilihan masakan ${city.name}`);
+
+          const title = document.createElement('h2');
+          title.className = 'kitchen-map-menu__dropdown-title';
+          title.textContent = `Masakan ${city.name}`;
+
+          const dishes = document.createElement('ul');
+          dishes.className = 'kitchen-map-menu__dishes';
+          city.dishes.forEach((dish, index) => {
+            const item = document.createElement('li');
+            item.textContent = `${index + 1}. ${dish.dish}`;
+            dishes.appendChild(item);
+          });
+
+          const chooseButton = document.createElement('button');
+          chooseButton.className = 'kitchen-map-menu__choose';
+          chooseButton.type = 'button';
+          chooseButton.textContent = city.key === selectedCity.key
+            ? 'Sedang memasak di sini'
+            : 'Masak di daerah ini';
+          chooseButton.disabled = city.key === selectedCity.key;
+          chooseButton.addEventListener('click', () => {
+            window.AyoNavigate(`ayomasak-dapur.html?region=${encodeURIComponent(city.key)}`);
+          });
+
+          dropdown.append(title, dishes, chooseButton);
+          entry.appendChild(dropdown);
+        }
+        kitchenMapRegions.appendChild(entry);
+      });
+
+      kitchenMapEmpty.hidden = visibleCount > 0;
+    }
+
+    renderKitchenMapRegions();
+    kitchenMapSearch.addEventListener('input', () => {
+      const expandedCity = window.AyoDishCatalog.cities.find(city => city.key === expandedMapEntry);
+      if (expandedCity &&
+          !`${expandedCity.name} ${expandedCity.city}`.toLocaleLowerCase('id')
+            .includes(kitchenMapSearch.value.trim().toLocaleLowerCase('id'))) {
+        expandedMapEntry = null;
+      }
+      renderKitchenMapRegions(kitchenMapSearch.value);
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || !expandedMapEntry) return;
+      const openRegion = expandedMapEntry;
+      expandedMapEntry = null;
+      renderKitchenMapRegions(kitchenMapSearch.value);
+      kitchenMapRegions.querySelector(`[data-region-key="${openRegion}"]`)?.focus();
+    });
 
     const regionalIngredientNames = selectedCity.dishes.flatMap(dish => dish.ingredients);
     if (selectedCity.dishes.length !== 3 ||
@@ -363,6 +492,7 @@
       if (kitchenDishBook.hidden) return;
       if (!kitchenRecipeMethod.hidden) closeKitchenRecipeMethod();
       kitchenDishBook.hidden = true;
+      kitchenDishBookButton.setAttribute('aria-expanded', 'false');
       kitchenDishBookButton.focus();
     }
 
@@ -374,8 +504,15 @@
     }
 
     kitchenDishBookButton.addEventListener('click', () => {
+      if (kitchenDesktopQuery.matches) {
+        loadKitchenIndex();
+        kitchenIndexMenu.hidden = false;
+        kitchenDishBookButton.setAttribute('aria-expanded', 'true');
+        return;
+      }
       renderKitchenDishIndex();
       kitchenDishBook.hidden = false;
+      kitchenDishBookButton.setAttribute('aria-expanded', 'true');
       kitchenDishBookClose.focus();
     });
     kitchenDishBookClose.addEventListener('click', closeKitchenDishBook);
@@ -915,10 +1052,31 @@
     });
 
     window.addEventListener('message', event => {
-      if (event.origin !== window.location.origin ||
-          event.source !== kitchenSettingsFrame.contentWindow ||
-          event.data?.type !== 'close-home-panel') return;
-      closeKitchenSettings();
+      if (event.origin !== window.location.origin || !event.data || typeof event.data !== 'object') return;
+
+      if (event.source === kitchenSettingsFrame.contentWindow && event.data.type === 'close-home-panel') {
+        closeKitchenSettings();
+        return;
+      }
+
+      if (event.source !== kitchenIndexFrame.contentWindow) return;
+      if (event.data.type === 'close-home-panel') {
+        kitchenIndexMenu.hidden = true;
+        kitchenDishBookButton.setAttribute('aria-expanded', 'false');
+        kitchenDishBookButton.focus();
+        return;
+      }
+
+      const city = window.AyoDishCatalog.cities.find(item => item.key === event.data.region);
+      if (!city) return;
+
+      if (event.data.type === 'start-cooking') {
+        window.AyoNavigate(`ayomasak-dapur.html?region=${encodeURIComponent(city.key)}`);
+      } else if (event.data.type === 'start-recipe' &&
+                 city.dishes.some(dish => dish.id === event.data.dish)) {
+        const query = new URLSearchParams({ region: city.key, dish: event.data.dish });
+        window.AyoNavigate(`ayomasak-dapur.html?${query.toString()}`);
+      }
     });
 
     document.addEventListener('keydown', event => {

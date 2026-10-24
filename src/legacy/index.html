@@ -881,6 +881,7 @@
       const city = window.AyoDishCatalog.cities.find(item => item.key === regionKey);
       if (!city) throw new Error(`Katalog masakan untuk daerah "${regionKey}" tidak tersedia.`);
       destinationPanel.classList.remove('destination-sheet__panel--center');
+      destinationPanel.classList.remove('destination-sheet__panel--index');
       destinationSheet.classList.remove('destination-sheet--center');
       destinationPanel.setAttribute('aria-label', `Destinasi ${city.name}`);
       destinationFrame.title = `Destinasi ${city.name}`;
@@ -892,6 +893,10 @@
     function openHomePanel(path, title, centered = false) {
       destinationSheet.classList.toggle('destination-sheet--center', centered);
       destinationPanel.classList.toggle('destination-sheet__panel--center', centered);
+      destinationPanel.classList.toggle(
+        'destination-sheet__panel--index',
+        path === 'ayomasak-index-masakan.html'
+      );
       destinationPanel.setAttribute('aria-label', title);
       destinationFrame.title = title;
       destinationFrame.src = `${path}?embed=1`;

@@ -7,8 +7,12 @@
   <meta name="description" content="AyoMasak! – buku indeks masakan dan koleksi stempel daerah Nusantara.">
   <script src="audio.js"></script>
   <script>
-    if (new URLSearchParams(window.location.search).get('embed') === '1') {
+    const pageParameters = new URLSearchParams(window.location.search);
+    if (pageParameters.get('embed') === '1') {
       document.documentElement.classList.add('embedded');
+    }
+    if (pageParameters.get('sidebar') === '1') {
+      document.documentElement.classList.add('embedded-index-sidebar');
     }
   </script>
 

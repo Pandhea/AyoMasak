@@ -1653,6 +1653,14 @@ body.page-home .ghost-btn{
       background: #701e01;
     }
 
+    @media (min-width: 801px) {
+      body.page-home .destination-sheet__panel--index{
+        width: min(92%, 1600px);
+        margin-bottom: 16px;
+        border-radius: 26px;
+      }
+    }
+
     body.page-home .destination-sheet--center{
       align-items: center;
       padding: 20px;
@@ -1991,6 +1999,237 @@ body.page-kitchen{
       font-size: var(--font-size-text);
       font-weight: 400;
       font-style: normal;
+    }
+
+    body.page-kitchen .kitchen-map-menu{
+      display: none;
+    }
+
+    body.page-kitchen .kitchen-index-menu{
+      display: none;
+    }
+
+    @media (min-width: 1025px) {
+      body.page-kitchen .kitchen{
+        height: min(var(--stage-height), calc(100dvh - 32px));
+        border: 6px solid var(--color-orange-400);
+        border-radius: var(--radius-xl);
+        background: transparent;
+        box-shadow: none;
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+      }
+
+      body.page-kitchen .kitchen-map-menu{
+        --kitchen-map-menu-width: calc(50vw - 245px);
+        position: fixed;
+        z-index: 10;
+        top: 50%;
+        left: 16px;
+        display: flex;
+        width: var(--kitchen-map-menu-width);
+        height: min(var(--stage-height), calc(100dvh - 32px));
+        min-height: 0;
+        flex-direction: column;
+        gap: 12px;
+        padding: 18px;
+        overflow: hidden;
+        border: 6px solid var(--color-orange-400);
+        border-radius: var(--radius-xl);
+        background-color: var(--color-brown-900);
+        box-shadow: var(--shadow-inset-panel), 0 12px 32px rgba(47, 20, 7, .35);
+        color: #fff3de;
+        font-family: "Fredoka", system-ui, sans-serif;
+        transform: translateY(-50%);
+      }
+
+      body.page-kitchen .kitchen-map-menu__search-label{
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      body.page-kitchen .kitchen-map-menu__search{
+        width: 100%;
+        min-height: 42px;
+        padding: 8px 12px;
+        border: 2px solid #efc17d;
+        border-radius: 12px;
+        outline: none;
+        background: #fff3de;
+        color: #572b12;
+        font: 600 15px "Fredoka", system-ui, sans-serif;
+      }
+
+      body.page-kitchen .kitchen-map-menu__search:focus-visible{
+        outline: 2px solid #fff;
+        outline-offset: 2px;
+      }
+
+      body.page-kitchen .kitchen-map-menu__regions{
+        display: grid;
+        min-height: 0;
+        flex: 1 1 auto;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-rows: max-content;
+        align-content: start;
+        gap: 12px 10px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 4px 8px 8px 2px;
+        overscroll-behavior: contain;
+        scrollbar-color: #efc17d rgba(255, 243, 222, .2);
+        scrollbar-width: thin;
+      }
+
+      body.page-kitchen .kitchen-map-menu__entry{
+        position: relative;
+        min-width: 0;
+        align-self: start;
+      }
+
+      body.page-kitchen .kitchen-map-menu__entry.is-expanded{
+        z-index: 2;
+        grid-column: 1 / -1;
+      }
+
+      body.page-kitchen .kitchen-map-menu__region{
+        position: relative;
+        display: grid;
+        min-width: 0;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 278 / 151;
+        place-items: center;
+        padding: 0;
+        overflow: hidden;
+        border: 0;
+        border-radius: 10px;
+        background: #8f471d;
+        isolation: isolate;
+        cursor: pointer;
+      }
+
+      body.page-kitchen .kitchen-map-menu__region::after{
+        position: absolute;
+        z-index: 2;
+        inset: 0;
+        border: 5px solid #fff;
+        border-radius: 10px;
+        box-shadow: inset 0 0 0 2px #fff;
+        content: "";
+        pointer-events: none;
+      }
+
+      body.page-kitchen .kitchen-map-menu__region img{
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        filter: drop-shadow(0 5px 5px rgba(38, 15, 5, .58));
+        pointer-events: none;
+      }
+
+      body.page-kitchen .kitchen-map-menu__region span{
+        position: relative;
+        z-index: 1;
+        max-width: calc(100% - 10px);
+        color: #fff;
+        font-size: clamp(11px, 1vw, 14px);
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+        text-shadow: 0 1px 3px #431b0d, 0 0 6px rgba(25, 10, 5, .95);
+      }
+
+      body.page-kitchen .kitchen-map-menu__dropdown{
+        margin-top: 7px;
+        padding: 12px;
+        border: 2px solid #fff3de;
+        border-radius: 12px;
+        background: #fff3de;
+        box-shadow: 0 6px 12px rgba(38, 15, 5, .3);
+        color: #572b12;
+      }
+
+      body.page-kitchen .kitchen-map-menu__dropdown-title{
+        margin: 0 0 8px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      body.page-kitchen .kitchen-map-menu__dishes{
+        display: grid;
+        gap: 5px;
+        margin: 0;
+        padding-left: 22px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      body.page-kitchen .kitchen-map-menu__choose{
+        width: 100%;
+        min-height: 40px;
+        margin-top: 10px;
+        border: 2px solid #9b4d1d;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #ffc16a, #f08a35);
+        box-shadow: 0 3px 0 #9b4d1d;
+        color: #4c260e;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      body.page-kitchen .kitchen-map-menu__choose:disabled{
+        cursor: default;
+        filter: saturate(.7);
+        opacity: .75;
+      }
+
+      body.page-kitchen .kitchen-map-menu__region[aria-current="location"]{
+        box-shadow: 0 0 0 3px rgba(247, 214, 91, .85);
+      }
+
+      body.page-kitchen .kitchen-map-menu__region:focus-visible{
+        outline: 3px solid #fff;
+        outline-offset: 2px;
+      }
+
+      body.page-kitchen .kitchen-map-menu__empty{
+        margin: 6px 0;
+        color: #fff3de;
+        font-size: 14px;
+        text-align: center;
+      }
+
+      body.page-kitchen .kitchen-index-menu{
+        position: fixed;
+        z-index: 9;
+        top: 50%;
+        right: 16px;
+        display: block;
+        width: calc(50vw - 245px);
+        height: min(var(--stage-height), calc(100dvh - 32px));
+        overflow: hidden;
+        border: 6px solid var(--color-orange-400);
+        border-radius: var(--radius-xl);
+        background: var(--color-brown-900);
+        box-shadow: var(--shadow-inset-panel), 0 12px 32px rgba(47, 20, 7, .35);
+        transform: translateY(-50%);
+      }
+
+      body.page-kitchen .kitchen-index-menu[hidden]{
+        display: none;
+      }
+
+      body.page-kitchen .kitchen-index-menu__frame{
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: transparent;
+      }
     }
 
     body.page-kitchen .kitchen__header{
@@ -5653,6 +5892,74 @@ html.embedded body.page-destination{
       height: 100%;
       min-height: 0;
       border-radius: 26px 26px 0 0;
+    }
+
+    html.embedded-index-sidebar body.page-recipes .dialog{
+      border-radius: var(--radius-2xl);
+    }
+
+    html.embedded body.page-recipes .dish-card-item{
+      height: auto;
+      aspect-ratio: 1;
+    }
+
+    html.embedded body.page-recipes .dish-group__list{
+      width: min(100%, 720px);
+      margin-inline: auto;
+    }
+
+    html.embedded body.page-recipes .dish-card__well,
+    html.embedded body.page-recipes .dish-card__face{
+      top: 24%;
+      right: auto;
+      left: 50%;
+      width: min(72%, 110px);
+      height: auto;
+      aspect-ratio: 1;
+      transform: translateX(-50%);
+    }
+
+    html.embedded body.page-recipes .dish-card__icon{
+      top: 50%;
+      width: min(52px, 58%);
+      height: auto;
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+    }
+
+    html.embedded body.page-recipes .dish-card__photo{
+      padding: 4px;
+      object-fit: contain;
+    }
+
+    html.embedded body.page-recipes .dish-card.is-locked .dish-card__icon{
+      display: block;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    html.embedded body.page-recipes .dish-card.is-locked .dish-card__photo{
+      filter: grayscale(1) brightness(.28);
+      opacity: .72;
+    }
+
+    html.embedded body.page-recipes .dish-card.is-locked .dish-card__lock-icon{
+      position: absolute;
+      z-index: 2;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    html.embedded body.page-recipes .dish-card__label--name{
+      top: auto;
+      bottom: 6px;
+    }
+
+    html.embedded body.page-recipes .dish-card__label--name.dish-card__label--shadow{
+      top: auto;
+      bottom: 4px;
     }
 
 
