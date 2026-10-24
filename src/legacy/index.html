@@ -16,6 +16,7 @@
   <div class="game-loading-screen is-waiting" id="gameLoadingScreen" role="status" aria-live="polite">
     <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
     <div class="game-loading-track" aria-hidden="true"><span></span></div>
+    <img class="startup-partner-logo" src="assets/logo/munas-permikomnas.png" alt="Munas Permikomnas">
   </div>
   <section class="idle-start-screen" id="idleStartScreen" aria-label="Mulai AyoMasak">
     <button class="idle-start-settings" type="button" aria-label="Pengaturan">
@@ -28,6 +29,7 @@
       <img class="idle-start-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!">
       <p class="idle-start-prompt" id="idleStartPrompt">Click anywhere to start</p>
     </div>
+    <img class="startup-partner-logo" src="assets/logo/munas-permikomnas.png" alt="Munas Permikomnas">
   </section>
   <div class="app">
     <section class="screen map-screen active" id="mapScreen" aria-label="Pilih daerah untuk memasak">
@@ -36,37 +38,12 @@
           <span class="profile-chip">Pilih daerah untuk mulai memasak</span>
           <div class="progress-chip">
             <span>⭐ <strong id="mapStars">0</strong></span>
-            <span id="mapProgress">0/18 resep</span>
+            <span id="mapProgress">0/114 resep</span>
           </div>
         </div>
 
         <div class="map-art" id="mapArt">
-          <div class="region-selection" aria-label="Pilihan daerah">
-            <button class="region-card" type="button" data-administration-id="ID-BT" data-name="Banten">
-              <img src="assets/map_menu/Frame Banten.png" alt="" draggable="false">
-              <span>Banten</span>
-            </button>
-            <button class="region-card" type="button" data-administration-id="ID-JK" data-name="DKI Jakarta">
-              <img src="assets/map_menu/Frame DKI Jakarta.png" alt="" draggable="false">
-              <span>DKI Jakarta</span>
-            </button>
-            <button class="region-card" type="button" data-administration-id="ID-JB" data-name="Jawa Barat">
-              <img src="assets/map_menu/Frame Jawa Barat.png" alt="" draggable="false">
-              <span>Jawa Barat</span>
-            </button>
-            <button class="region-card" type="button" data-administration-id="ID-JT" data-name="Jawa Tengah">
-              <img src="assets/map_menu/Frame Jawa Tengah.png" alt="" draggable="false">
-              <span>Jawa Tengah</span>
-            </button>
-            <button class="region-card" type="button" data-administration-id="ID-YO" data-name="DI Yogyakarta">
-              <img src="assets/map_menu/Frame DI Yogyakarta.png" alt="" draggable="false">
-              <span>DI Yogyakarta</span>
-            </button>
-            <button class="region-card" type="button" data-administration-id="ID-JI" data-name="Jawa Timur">
-              <img src="assets/map_menu/Frame Jawa Timur.png" alt="" draggable="false">
-              <span>Jawa Timur</span>
-            </button>
-          </div>
+          <div class="region-selection" id="regionSelection" aria-label="Pilihan daerah"></div>
         </div>
       </div>
     </section>
@@ -167,12 +144,16 @@
         <button class="menu-btn" type="button" aria-label="Cara Bermain" title="Cara Bermain">
           <img src="assets/new_button/Property 1=Default.png" alt="" draggable="false">
         </button>
-        <button class="menu-btn" id="cookingMenuButton" type="button" aria-label="Mulai Memasak"
-          title="Pilih daerah terlebih dahulu" disabled>
-          <img src="assets/new_button/Property 1=Default-1.png" alt="" draggable="false">
-        </button>
-        <button class="menu-btn" id="collectionMenuButton" type="button" aria-label="Peta dan Koleksi"
-          title="Lihat peta dan resep yang terbuka">
+        <label class="region-search" for="regionSearch">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <circle cx="10.8" cy="10.8" r="6.3"></circle>
+            <path d="m15.5 15.5 5 5"></path>
+          </svg>
+          <input id="regionSearch" type="search" placeholder="Cari daerah..." autocomplete="off"
+            aria-label="Cari daerah">
+        </label>
+        <button class="menu-btn" id="collectionMenuButton" type="button" aria-label="Buku Indeks Masakan"
+          title="Buku Indeks Masakan – lihat koleksi resep dan stempel daerah">
           <img src="assets/new_button/Property 1=Default-2.png" alt="" draggable="false">
         </button>
         <button class="settings-btn" type="button" aria-label="Pengaturan" title="Pengaturan">
@@ -299,7 +280,6 @@
       stars: Number(saved.stars || 0)
     };
     let selectedAdministration = null;
-    let selectedCityKey = null;
 
     const mapScreen = document.getElementById('mapScreen');
     const gameScreen = document.getElementById('gameScreen');
@@ -325,9 +305,9 @@
     const stampList = document.getElementById('stampList');
     const stampProgress = document.getElementById('stampProgress');
     const menuButtons = [...document.querySelectorAll('.menu-btn')];
-    const cookingMenuButton = document.getElementById('cookingMenuButton');
     const mapStage = document.getElementById('mapStage');
     const mapArt = document.getElementById('mapArt');
+    const regionSelection = document.getElementById('regionSelection');
     const mapSvgs = [...mapArt.querySelectorAll('svg')];
     const destinationSheet = document.getElementById('destinationSheet');
     const destinationPanel = document.getElementById('destinationPanel');
@@ -518,6 +498,103 @@
       }
     }
 
+    [...window.AyoDishCatalog.cities]
+      .sort((first, second) => first.name.localeCompare(second.name, 'id'))
+      .forEach(city => {
+        const button = document.createElement('button');
+        button.className = 'region-card';
+        button.type = 'button';
+        button.dataset.regionKey = city.key;
+        button.dataset.name = city.name;
+        button.setAttribute('aria-label', `Pilih ${city.name}`);
+
+        const image = document.createElement('img');
+        image.src = city.frame;
+        image.alt = '';
+        image.draggable = false;
+
+        const label = document.createElement('span');
+        label.textContent = city.name;
+        button.append(image, label);
+        regionSelection.appendChild(button);
+      });
+
+    document.getElementById('regionSearch').addEventListener('input', event => {
+      const query = event.currentTarget.value.trim().toLocaleLowerCase('id');
+      regionSelection.querySelectorAll('.region-entry').forEach(entry => {
+        entry.hidden = !entry.querySelector('.region-card').dataset.name
+          .toLocaleLowerCase('id')
+          .includes(query);
+      });
+      layoutDesktopRegionCards();
+    });
+
+    function layoutDesktopRegionCards() {
+      const entries = [...regionSelection.querySelectorAll('.region-entry')];
+      entries.forEach(entry => {
+        entry.style.transform = '';
+      });
+      if (mobileMapQuery.matches) {
+        regionSelection.style.paddingBottom = '';
+        return;
+      }
+
+      const selectedEntry = entries.find(entry => !entry.hidden && !entry.querySelector('.region-dropdown').hidden);
+      if (!selectedEntry) {
+        regionSelection.style.paddingBottom = '';
+        return;
+      }
+
+      const dropdown = selectedEntry.querySelector('.region-dropdown');
+      const dropdownRect = dropdown.getBoundingClientRect();
+      const rowGap = Number.parseFloat(getComputedStyle(regionSelection).rowGap) || 0;
+      const obstacles = [{
+        left: dropdownRect.left,
+        right: dropdownRect.right,
+        top: dropdownRect.top,
+        bottom: dropdownRect.bottom
+      }];
+      const orderedEntries = entries
+        .filter(entry => !entry.hidden && entry !== selectedEntry)
+        .sort((first, second) => {
+          const firstRect = first.getBoundingClientRect();
+          const secondRect = second.getBoundingClientRect();
+          return firstRect.top - secondRect.top || firstRect.left - secondRect.left;
+        });
+
+      orderedEntries.forEach(entry => {
+        const rect = entry.getBoundingClientRect();
+        let offset = 0;
+        let collisionFound = true;
+        while (collisionFound) {
+          collisionFound = false;
+          const top = rect.top + offset;
+          const bottom = rect.bottom + offset;
+          for (const obstacle of obstacles) {
+            const overlapsHorizontally = rect.left < obstacle.right && rect.right > obstacle.left;
+            const overlapsVertically = top < obstacle.bottom && bottom > obstacle.top;
+            if (overlapsHorizontally && overlapsVertically) {
+              offset += obstacle.bottom - top + rowGap;
+              collisionFound = true;
+              break;
+            }
+          }
+        }
+
+        if (offset > 0) {
+          entry.style.transform = `translateY(${offset}px)`;
+          obstacles.push({
+            left: rect.left,
+            right: rect.right,
+            top: rect.top + offset,
+            bottom: rect.bottom + offset
+          });
+        }
+      });
+
+      regionSelection.style.paddingBottom = `${Math.max(32, dropdownRect.height + 64)}px`;
+    }
+
     let lastRegionTouchActivation = 0;
     mapArt.querySelectorAll('.region-card').forEach(button => {
       const entry = document.createElement('div');
@@ -527,7 +604,7 @@
 
       const dropdown = document.createElement('section');
       dropdown.className = 'region-dropdown';
-      dropdown.id = `regionDropdown-${button.dataset.administrationId}`;
+      dropdown.id = `regionDropdown-${button.dataset.regionKey}`;
       dropdown.hidden = true;
       dropdown.setAttribute('aria-label', `${button.dataset.name} masakan dan bahan`);
 
@@ -554,8 +631,7 @@
       cookButton.className = 'region-dropdown__cook';
       cookButton.textContent = 'Masak di daerah ini';
       cookButton.addEventListener('click', () => {
-        if (!selectedCityKey) return;
-        window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(selectedCityKey)}`;
+        window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(button.dataset.regionKey)}`;
       });
 
       dropdown.append(closeButton, title, subtitle, dishList, cookButton);
@@ -565,6 +641,8 @@
         dropdown.hidden = true;
         button.classList.remove('selected');
         button.setAttribute('aria-expanded', 'false');
+        entry.classList.remove('is-expanded');
+        layoutDesktopRegionCards();
       });
 
       button.setAttribute('aria-pressed', 'false');
@@ -575,20 +653,14 @@
         const shouldOpen = dropdown.hidden;
         mapArt.querySelectorAll('.region-dropdown').forEach(panel => {
           panel.hidden = true;
+          panel.parentElement.classList.remove('is-expanded');
           const regionButton = panel.parentElement.querySelector('.region-card');
           regionButton.classList.remove('selected');
           regionButton.setAttribute('aria-expanded', 'false');
         });
 
-        selectedAdministration = {
-          id: button.dataset.administrationId,
-          name: button.dataset.name
-        };
-        const cityKey = destinationByAdministration[selectedAdministration.id];
-        const city = window.AyoDishCatalog.cities.find(item => item.key === cityKey);
-        if (!city) throw new Error(`Katalog masakan untuk ${selectedAdministration.name} tidak tersedia.`);
-        selectedCityKey = city.key;
-        cookingMenuButton.disabled = false;
+        const city = window.AyoDishCatalog.cities.find(item => item.key === button.dataset.regionKey);
+        if (!city) throw new Error(`Katalog masakan untuk ${button.dataset.name} tidak tersedia.`);
         mapArt.querySelectorAll('.region-card').forEach(card => {
           const isSelected = card === button;
           card.classList.toggle('selected', isSelected);
@@ -596,6 +668,7 @@
         });
         dropdown.hidden = !shouldOpen;
         button.setAttribute('aria-expanded', String(shouldOpen));
+        entry.classList.toggle('is-expanded', shouldOpen);
         if (shouldOpen) {
           dishList.replaceChildren();
           city.dishes.forEach((dish, index) => {
@@ -607,11 +680,16 @@
               ? `${dish.dish} sudah terbuka`
               : `Masakan ${index + 1} terkunci`);
 
-            const image = document.createElement('img');
-            image.className = 'region-dish-index__silhouette';
-            image.src = dish.image || `assets/Jawa/${city.assetFolder || city.name}/${dish.id}.png`;
-            image.alt = '';
-            image.loading = 'lazy';
+            const image = dish.image ? document.createElement('img') : document.createElement('span');
+            image.className = `region-dish-index__silhouette${dish.image ? '' : ' region-dish-index__emoji'}`;
+            if (dish.image) {
+              image.src = dish.image;
+              image.alt = '';
+              image.loading = 'lazy';
+            } else {
+              image.textContent = dish.emoji;
+              image.setAttribute('aria-hidden', 'true');
+            }
 
             const lock = document.createElement('span');
             lock.className = 'region-dish-index__lock';
@@ -629,6 +707,7 @@
             dishList.appendChild(item);
           });
         }
+        window.requestAnimationFrame(layoutDesktopRegionCards);
       };
       button.addEventListener('pointerdown', event => {
         touchStartPoint = event.pointerType === 'touch'
@@ -654,6 +733,8 @@
         activateRegion();
       });
     });
+
+    window.addEventListener('resize', layoutDesktopRegionCards);
 
     function persistProgress() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -762,7 +843,6 @@
     }
 
     function openAdministration(administrationId, administrationName) {
-      playTone(440, 120, 0.03);
       const regionKey = destinationByAdministration[administrationId];
       if (regionKey) {
         openDestination(regionKey);
@@ -831,6 +911,7 @@
       if (event.data?.type === 'close-destination' || event.data?.type === 'close-home-panel') closeDestination();
       if (event.data?.type === 'audio-start') window.AyoAudio.startMusic();
       if (event.data?.type === 'audio-settings') window.AyoAudio.setSettings(event.data.settings);
+      if (event.data?.type === 'audio-click') window.AyoAudio.playClick();
       if (event.data?.type === 'audio-tone') {
         const { frequency, duration, volume } = event.data;
         if ([frequency, duration, volume].every(Number.isFinite)) {
@@ -1000,22 +1081,15 @@
       render();
     }
 
-    function playTone(freq, duration, volume = 0.04) {
-      window.AyoAudio.playTone(freq, duration, volume);
-    }
-
     document.getElementById('backBtn').addEventListener('click', () => {
-      playTone(260, 80, 0.03);
       showScreen('map');
     });
 
     nextStepBtn.addEventListener('click', () => {
-      playTone(660, 120, 0.04);
       finishCurrentStep();
     });
 
     resetBtn.addEventListener('click', () => {
-      playTone(180, 100, 0.02);
       resetSelection();
     });
 
@@ -1035,25 +1109,23 @@
           return;
         }
 
-        if (label === 'Mulai Memasak') {
-          if (!selectedCityKey) return;
-          window.location.href = `ayomasak-dapur.html?region=${encodeURIComponent(selectedCityKey)}`;
+        if (label === 'Peta dan Koleksi') {
+          showScreen('map');
           return;
         }
 
-        if (label === 'Peta dan Koleksi') {
-          showScreen('map');
+        if (label === 'Buku Indeks Masakan') {
+          openHomePanel('ayomasak-index-masakan.html', 'Buku Indeks Masakan');
+          return;
         }
       });
     });
 
     document.querySelector('.settings-btn').addEventListener('click', () => {
-      playTone(520, 100, 0.03);
       openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
     });
 
     document.querySelector('.idle-start-settings').addEventListener('click', () => {
-      playTone(520, 100, 0.03);
       openHomePanel('ayomasak-pengaturan.html', 'Pengaturan', true);
     });
 

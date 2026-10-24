@@ -157,13 +157,7 @@
     const recipe = catalogDish
       ? {
           ...catalogDish,
-          image: catalogDish.image || `assets/Jawa/${selectedCity.assetFolder || selectedCity.city}/${catalogDish.id}.png`,
-          ingredientImages: Object.fromEntries(
-            (catalogDish.illustratedIngredients || []).map((name, index) => [
-              name,
-              `assets/Jawa/Bahan Utama/${catalogDish.id}-${index + 1}.png`
-            ])
-          ),
+          image: catalogDish.image,
           name: selectedCity.name,
           city: selectedCity.city
         }
@@ -276,10 +270,8 @@
       if (isCooking || isCooked || isFailed) return;
       if (selectedIngredients.has(ingredientId)) {
         selectedIngredients.delete(ingredientId);
-        window.AyoAudio.playTone(300, 75, 0.025);
       } else {
         selectedIngredients.add(ingredientId);
-        window.AyoAudio.playTone(460, 85, 0.025);
       }
       const button = ingredientGrid.querySelector(`[data-ingredient="${CSS.escape(ingredientId)}"]`);
       if (button) {
@@ -627,9 +619,7 @@
       const storyDishPhoto = document.getElementById('storyDishPhoto');
       const storyDishPlaceholder = document.getElementById('storyDishPlaceholder');
       storyDishPlaceholder.textContent = cookedDish.emoji;
-      const imagePath = cookedDish.image || (matchedCity
-        ? `assets/Jawa/${matchedCity.assetFolder || matchedCity.city}/${cookedDish.id}.png`
-        : '');
+      const imagePath = cookedDish.image || '';
       if (imagePath) {
         storyDishPhoto.src = imagePath;
         storyDishPhoto.alt = cookedDish.dish;
@@ -680,7 +670,6 @@
       setIngredientControlsDisabled(true);
       setCookButtonLabel('Memasak...');
       cookFeedback.textContent = 'Wajan tertutup. Sedang memasak, tunggu 3 detik...';
-      window.AyoAudio.playTone(520, 120, 0.025);
 
       cookingTimer = window.setTimeout(() => {
         cookingTimer = null;

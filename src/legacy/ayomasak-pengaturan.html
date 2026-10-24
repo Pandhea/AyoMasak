@@ -24,13 +24,14 @@
     <div class="game-loading-track" aria-hidden="true"><span></span></div>
   </div>
   <main>
-    <section class="dialog" role="dialog" aria-label="Pengaturan">
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <div class="panel">
 
         <h1 class="panel__logo">
-          <span class="panel__logo-icon" aria-hidden="true">⚙️</span>
-          <span>Pengaturan</span>
+          <span class="panel__logo-icon" aria-hidden="true">♫</span>
+          <span id="settingsTitle">Pengaturan</span>
         </h1>
+        <p class="panel__description">Atur volume musik dan efek suara</p>
 
         <button class="close-button" type="button" aria-label="Tutup">
           <span class="close-button__base"></span>
@@ -51,19 +52,21 @@
         <div class="volume-settings" role="group" aria-label="Pengaturan volume">
           <label class="volume-control" for="musicVolume">
             <span class="volume-control__heading">
-              <span class="volume-control__icon" aria-hidden="true">♫</span>
-              <span>Musik</span>
+              <span class="volume-control__icon volume-control__icon--music" aria-hidden="true">♫</span>
+              <span class="volume-control__name">Musik latar</span>
               <output class="volume-control__value" id="musicVolumeValue" for="musicVolume">28%</output>
             </span>
+            <span class="volume-control__hint">Musik saat menjelajahi AyoMasak</span>
             <input class="volume-control__slider" id="musicVolume" type="range"
-                   min="0" max="100" value="28" aria-label="Volume musik">
+                   min="0" max="100" value="28" aria-label="Volume musik latar">
           </label>
           <label class="volume-control" for="effectsVolume">
             <span class="volume-control__heading">
-              <span class="volume-control__icon" aria-hidden="true">🔔</span>
-              <span>Efek suara</span>
+              <span class="volume-control__icon volume-control__icon--effects" aria-hidden="true">✦</span>
+              <span class="volume-control__name">Efek suara</span>
               <output class="volume-control__value" id="effectsVolumeValue" for="effectsVolume">70%</output>
             </span>
+            <span class="volume-control__hint">Suara klik dan interaksi</span>
             <input class="volume-control__slider" id="effectsVolume" type="range"
                    min="0" max="100" value="70" aria-label="Volume efek suara">
           </label>
@@ -72,9 +75,6 @@
       </div>
     </section>
   </main>
-  <a class="map-attribution" href="https://www.amcharts.com/svg-maps/" target="_blank" rel="noreferrer">
-    Peta oleh amCharts
-  </a>
   <script src="audio.js"></script>
   <script>
     const embedded = new URLSearchParams(window.location.search).get('embed') === '1';
@@ -88,6 +88,7 @@
       slider.value = String(value);
       output.value = `${value}%`;
       output.textContent = `${value}%`;
+      slider.style.setProperty('--volume-level', `${value}%`);
     }
 
     updateVolumeControl(musicSlider, musicValue, audioSettings.music);

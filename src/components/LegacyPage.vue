@@ -84,6 +84,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  window.AyoAudio?.dispose();
   insertedScripts.forEach(script => script.remove());
   insertedScripts = [];
   document.body.className = originalBodyClass;

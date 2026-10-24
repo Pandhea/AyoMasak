@@ -156,9 +156,7 @@
       card.className = `dish-card${dish.id === 'kerak-telor' ? ' dish-card--kerak-telor' : ''}`;
       const emoji = card.querySelector('.dish-card__emoji');
       const photo = card.querySelector('.dish-card__photo');
-      const imagePath = dish.image || (city
-        ? `assets/Jawa/${city.assetFolder || city.name}/${dish.id}.png`
-        : '');
+      const imagePath = dish.image || '';
       emoji.textContent = dish.emoji;
       emoji.hidden = Boolean(imagePath);
       photo.hidden = !imagePath;

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>AyoMasak! – Masakan</title>
-  <meta name="description" content="AyoMasak! – daftar masakan.">
+  <title>AyoMasak! – Buku Indeks Masakan</title>
+  <meta name="description" content="AyoMasak! – buku indeks masakan dan koleksi stempel daerah Nusantara.">
   <script src="audio.js"></script>
   <script>
     if (new URLSearchParams(window.location.search).get('embed') === '1') {
@@ -14,8 +14,6 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -24,13 +22,14 @@
     <img class="game-loading-logo" src="assets/logo/ayomasak-logo.svg" alt="AyoMasak!" fetchpriority="high">
     <div class="game-loading-track" aria-hidden="true"><span></span></div>
   </div>
+
   <main>
-    <section class="dialog" role="dialog" aria-label="Masakan">
+    <section class="dialog" role="dialog" aria-label="Buku Indeks Masakan">
       <div class="panel">
 
         <h1 class="panel__logo">
-          <span class="panel__logo-icon" aria-hidden="true">🍳</span>
-          <span>Masakan</span>
+          <span class="panel__logo-icon" aria-hidden="true">📖</span>
+          <span>Buku Indeks Masakan</span>
         </h1>
 
         <button class="close-button" type="button" aria-label="Tutup">
@@ -41,14 +40,42 @@
           </span>
         </button>
 
+        <!-- Stats Bar & Wilayah Tabs -->
+        <header class="index-header-controls">
+          <div class="index-stats-bar">
+            <div class="index-stat-item">
+              <span class="index-stat-icon">🍲</span>
+              <span>Resep Terbuka:</span>
+              <span class="index-stat-count" id="statRecipesCount">0/114</span>
+            </div>
+            <div class="index-stat-item">
+              <span class="index-stat-icon">🏅</span>
+              <span>Stempel Daerah:</span>
+              <span class="index-stat-count" id="statStampsCount">0/38</span>
+            </div>
+          </div>
+
+          <nav class="index-wilayah-tabs" id="wilayahTabs" aria-label="Filter Wilayah">
+            <button class="index-tab-btn is-active" type="button" data-wilayah="all">Semua (38)</button>
+            <button class="index-tab-btn" type="button" data-wilayah="Sumatera">Sumatera (10)</button>
+            <button class="index-tab-btn" type="button" data-wilayah="Jawa">Jawa (6)</button>
+            <button class="index-tab-btn" type="button" data-wilayah="Bali & Nusa Tenggara">Bali & Nusa (3)</button>
+            <button class="index-tab-btn" type="button" data-wilayah="Kalimantan">Kalimantan (5)</button>
+            <button class="index-tab-btn" type="button" data-wilayah="Sulawesi">Sulawesi (6)</button>
+            <button class="index-tab-btn" type="button" data-wilayah="Maluku & Papua">Maluku & Papua (8)</button>
+          </nav>
+        </header>
+
+        <!-- Scrollable Index Area -->
         <div class="index">
-          <div class="index__list" id="dishGroups" aria-label="Daftar masakan menurut daerah"></div>
+          <div class="index__list" id="dishGroups" aria-label="Daftar masakan menurut wilayah dan daerah"></div>
         </div>
 
       </div>
     </section>
-    <section class="dish-story" id="dishStory" hidden
-             role="dialog" aria-modal="true" aria-labelledby="dishStoryTitle">
+
+    <!-- Modal Cerita Masakan (Unlocked Dish) -->
+    <section class="dish-story" id="dishStory" hidden role="dialog" aria-modal="true" aria-labelledby="dishStoryTitle">
       <div class="dish-story__paper">
         <button class="dish-story__close" id="dishStoryClose" type="button" aria-label="Tutup cerita masakan">×</button>
         <span class="dish-story__eyebrow" id="dishStoryCity"></span>
@@ -56,34 +83,130 @@
         <span class="dish-story__emoji" id="dishStoryEmoji" aria-hidden="true"></span>
         <span class="dish-story__eyebrow">Cerita di balik hidangan</span>
         <h2 class="dish-story__title" id="dishStoryTitle"></h2>
+        <div class="dish-story__ingredients" id="dishStoryIngredientsContainer">
+          <span class="dish-story__ingredients-title">Bahan Utama:</span>
+          <span id="dishStoryIngredients"></span>
+        </div>
         <p class="dish-story__text" id="dishStoryText"></p>
+        <button class="modal-action-btn" id="dishStoryCookBtn" type="button">🍳 Masak di Dapur</button>
       </div>
     </section>
+
+    <!-- Modal Resep Terkunci (Locked Dish) -->
+    <section class="dish-story" id="lockedModal" hidden role="dialog" aria-modal="true" aria-labelledby="lockedModalTitle">
+      <div class="dish-story__paper">
+        <button class="dish-story__close" id="lockedModalClose" type="button" aria-label="Tutup">×</button>
+        <div class="dish-story__emoji" aria-hidden="true">🔒</div>
+        <span class="dish-story__eyebrow" id="lockedModalCity">Daerah Nusantara</span>
+        <h2 class="dish-story__title" id="lockedModalTitle">Masakan Masih Terkunci</h2>
+        <p class="dish-story__text" id="lockedModalText">
+          Resep ini masih menjadi rahasia dapur! Masaklah di dapur daerah ini untuk mengungkap hidangan lezat dan mengoleksi stempel resminya.
+        </p>
+        <button class="modal-action-btn" id="lockedModalCookBtn" type="button">🍳 Masak di Dapur</button>
+      </div>
+    </section>
+
+    <!-- Modal Info Stempel Daerah (Stamp Inspection) -->
+    <section class="dish-story" id="stampModal" hidden role="dialog" aria-modal="true" aria-labelledby="stampModalTitle">
+      <div class="dish-story__paper">
+        <button class="dish-story__close" id="stampModalClose" type="button" aria-label="Tutup">×</button>
+        <span class="dish-story__eyebrow" id="stampModalSubtitle">Koleksi Stempel Daerah</span>
+        <h2 class="dish-story__title" id="stampModalTitle">Stempel Daerah</h2>
+        <img class="stamp-preview-img" id="stampModalImage" alt="Stempel Daerah" src="" hidden>
+        <div class="dish-story__emoji" id="stampModalLockEmoji">🔒</div>
+        <p class="dish-story__text" id="stampModalText"></p>
+        <button class="modal-action-btn" id="stampModalActionBtn" type="button">Jelajahi Dapur</button>
+      </div>
+    </section>
+
   </main>
+
   <script src="recipe-catalog.js"></script>
   <script>
     const embedded = new URLSearchParams(window.location.search).get('embed') === '1';
     const dishGroups = document.getElementById('dishGroups');
+    const wilayahTabs = document.getElementById('wilayahTabs');
+    const statRecipesCount = document.getElementById('statRecipesCount');
+    const statStampsCount = document.getElementById('statStampsCount');
+
+    // Modals
     const dishStory = document.getElementById('dishStory');
     const dishStoryClose = document.getElementById('dishStoryClose');
+    const dishStoryCookBtn = document.getElementById('dishStoryCookBtn');
+
+    const lockedModal = document.getElementById('lockedModal');
+    const lockedModalClose = document.getElementById('lockedModalClose');
+    const lockedModalCookBtn = document.getElementById('lockedModalCookBtn');
+
+    const stampModal = document.getElementById('stampModal');
+    const stampModalClose = document.getElementById('stampModalClose');
+    const stampModalActionBtn = document.getElementById('stampModalActionBtn');
+
+    let currentActiveRegion = null;
+    let currentActiveDish = null;
     let lastFocusedCard = null;
+    let activeWilayahFilter = 'all';
+
+    const WILAYAH_ICONS = {
+      'Sumatera': '🌴',
+      'Jawa': '🌋',
+      'Bali & Nusa Tenggara': '🏝️',
+      'Kalimantan': '🌳',
+      'Sulawesi': '🌊',
+      'Maluku & Papua': '🦜'
+    };
+
+    function getSavedProgress() {
+      try {
+        const raw = localStorage.getItem('ayoMasakProgress');
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function goToKitchen(regionKey, dishId) {
+      if (embedded) {
+        window.parent.postMessage({
+          type: dishId ? 'start-recipe' : 'start-cooking',
+          region: regionKey,
+          dish: dishId
+        }, window.location.origin);
+      } else {
+        const query = new URLSearchParams({ region: regionKey });
+        if (dishId) query.set('dish', dishId);
+        window.location.href = `ayomasak-dapur.html?${query.toString()}`;
+      }
+    }
 
     function openDishStory(region, dish) {
+      currentActiveRegion = region;
+      currentActiveDish = dish;
+
       const image = document.getElementById('dishStoryImage');
       const emoji = document.getElementById('dishStoryEmoji');
-      const imagePath = dish.image || `assets/Jawa/${region.assetFolder || region.city}/${dish.id}.png`;
-      document.getElementById('dishStoryCity').textContent = region.city;
+      const imagePath = dish.image || '';
+
+      document.getElementById('dishStoryCity').textContent = `${region.name} • ${region.city}`;
       document.getElementById('dishStoryTitle').textContent = dish.dish;
       document.getElementById('dishStoryText').textContent = dish.story;
-      image.src = imagePath;
-      image.alt = dish.dish;
-      image.hidden = false;
-      emoji.textContent = dish.emoji;
-      emoji.hidden = true;
+      document.getElementById('dishStoryIngredients').textContent = Array.isArray(dish.ingredients)
+        ? dish.ingredients.join(', ')
+        : 'Bahan khas daerah';
+
+      emoji.textContent = dish.emoji || '🍲';
+      emoji.hidden = Boolean(imagePath);
+      image.hidden = !imagePath;
+
+      if (imagePath) {
+        image.src = imagePath;
+        image.alt = dish.dish;
+      }
       image.onerror = () => {
         image.hidden = true;
         emoji.hidden = false;
       };
+
       dishStory.hidden = false;
       requestAnimationFrame(() => {
         dishStory.classList.add('is-visible');
@@ -98,68 +221,363 @@
       lastFocusedCard?.focus();
     }
 
-    window.AyoDishCatalog.cities.forEach((region, regionIndex) => {
-      const group = document.createElement('section');
-      group.className = 'dish-group';
-      const heading = document.createElement('h2');
-      heading.className = 'dish-group__title';
-      heading.id = `dish-region-${regionIndex}`;
-      heading.textContent = region.key === 'banten'
-        ? 'Banten, Serang'
-        : region.key === 'jakarta'
-          ? 'DKI Jakarta, Jakarta'
-          : region.key === 'bandung'
-            ? 'Jawa Barat, Bandung'
-            : region.key === 'semarang'
-              ? 'Jawa Tengah, Semarang'
-              : region.key === 'yogyakarta'
-                ? 'DI Yogyakarta, Yogyakarta'
-                : `Jawa Timur, ${region.city}`;
-      const list = document.createElement('ul');
-      list.className = 'dish-group__list';
-      list.setAttribute('aria-labelledby', heading.id);
+    function openLockedModal(region, dish) {
+      currentActiveRegion = region;
+      currentActiveDish = dish;
 
-      region.dishes.forEach(dish => {
-        const item = document.createElement('li');
-        item.className = 'dish-card-item';
-        const card = document.createElement('button');
-        card.className = 'dish-card';
-        card.type = 'button';
-        card.dataset.dish = dish.id;
-        card.dataset.region = region.key;
-        card.setAttribute('aria-label', `Masak ${dish.dish}`);
-        card.innerHTML = `
-          <span class="dish-card__well"></span>
-          <span class="dish-card__face">
-            <span class="dish-card__icon">
-              <img class="dish-card__photo" src="${dish.image || `assets/Jawa/${region.assetFolder || region.city}/${dish.id}.png`}" alt="${dish.dish}">
-            </span>
-          </span>
-          <span class="dish-card__label dish-card__label--region dish-card__label--shadow" aria-hidden="true">${region.city}</span>
-          <span class="dish-card__label dish-card__label--name dish-card__label--shadow" aria-hidden="true">${dish.dish}</span>
-          <span class="dish-card__label dish-card__label--region">${region.city}</span>
-          <span class="dish-card__label dish-card__label--name">${dish.dish}</span>`;
-        item.appendChild(card);
-        list.appendChild(item);
+      document.getElementById('lockedModalCity').textContent = `${region.name} • ${region.city}`;
+      document.getElementById('lockedModalTitle').textContent = 'Resep Belum Terbuka';
+      document.getElementById('lockedModalText').textContent =
+        `Hidangan dari ${region.name} ini masih terkunci. Mulai memasak di dapur kota ${region.city} untuk membuka resep dan stempel resminya!`;
+
+      lockedModal.hidden = false;
+      requestAnimationFrame(() => {
+        lockedModal.classList.add('is-visible');
+        lockedModalClose.focus();
+      });
+    }
+
+    function closeLockedModal() {
+      if (lockedModal.hidden) return;
+      lockedModal.classList.remove('is-visible');
+      lockedModal.hidden = true;
+      lastFocusedCard?.focus();
+    }
+
+    function openStampModal(region, isFullUnlocked, unlockedCount, totalDishes) {
+      currentActiveRegion = region;
+      const modalImage = document.getElementById('stampModalImage');
+      const modalLock = document.getElementById('stampModalLockEmoji');
+      const title = document.getElementById('stampModalTitle');
+      const subtitle = document.getElementById('stampModalSubtitle');
+      const text = document.getElementById('stampModalText');
+
+      subtitle.textContent = `Koleksi Stempel • ${region.name}`;
+
+      if (isFullUnlocked) {
+        title.textContent = `Stempel Resmi ${region.name}`;
+        modalImage.src = region.stamp;
+        modalImage.alt = `Stempel ${region.name}`;
+        modalImage.hidden = false;
+        modalLock.hidden = true;
+        text.textContent = `Selamat! Seluruh ${totalDishes} masakan di ${region.name} (${region.city}) telah berhasil kamu masak dan tercatat di buku indeks. Stempel daerah ini resmi menjadi koleksimu!`;
+        stampModalActionBtn.textContent = '🍳 Masak Lagi di Sini';
+      } else {
+        title.textContent = `Stempel ${region.name} (Terkunci)`;
+        modalImage.hidden = true;
+        modalLock.hidden = false;
+        const remaining = totalDishes - unlockedCount;
+        text.textContent = `Kamu telah membuka ${unlockedCount} dari ${totalDishes} masakan di ${region.name}. Selesaikan ${remaining} masakan lagi di dapur untuk membuka stempel resmi daerah ini!`;
+        stampModalActionBtn.textContent = '🍳 Masak Sekarang';
+      }
+
+      stampModal.hidden = false;
+      requestAnimationFrame(() => {
+        stampModal.classList.add('is-visible');
+        stampModalClose.focus();
+      });
+    }
+
+    function closeStampModal() {
+      if (stampModal.hidden) return;
+      stampModal.classList.remove('is-visible');
+      stampModal.hidden = true;
+    }
+
+    function renderIndexBook() {
+      const progress = getSavedProgress();
+      const completedDishesByCity = progress.completedDishesByCity || {};
+      const cookingStamps = Array.isArray(progress.cookingStamps) ? progress.cookingStamps : [];
+
+      let totalAllDishes = 0;
+      let totalAllUnlocked = 0;
+      let totalAllStamps = 0;
+
+      // Group cities by Wilayah
+      const wilayahMap = new Map();
+      window.AyoDishCatalog.cities.forEach(city => {
+        const wilayah = city.wilayah || 'Nusantara';
+        if (!wilayahMap.has(wilayah)) wilayahMap.set(wilayah, []);
+        wilayahMap.get(wilayah).push(city);
       });
 
-      group.append(heading, list);
-      dishGroups.appendChild(group);
-    });
+      dishGroups.replaceChildren();
 
-    document.querySelectorAll('.dish-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const region = window.AyoDishCatalog.cities.find(item => item.key === card.dataset.region);
-        const dish = region?.dishes.find(item => item.id === card.dataset.dish);
-        if (!region || !dish) throw new Error(`Resep "${card.dataset.dish}" tidak ditemukan.`);
-        lastFocusedCard = card;
-        openDishStory(region, dish);
+      wilayahMap.forEach((citiesInWilayah, wilayahName) => {
+        let wilayahTotalDishes = 0;
+        let wilayahUnlockedDishes = 0;
+        let wilayahStampsCount = 0;
+
+        // Create Wilayah Card container
+        const wilayahCard = document.createElement('article');
+        wilayahCard.className = 'wilayah-card';
+        wilayahCard.dataset.wilayah = wilayahName;
+        if (activeWilayahFilter !== 'all' && activeWilayahFilter !== wilayahName) {
+          wilayahCard.hidden = true;
+        }
+
+        const wilayahHeader = document.createElement('header');
+        wilayahHeader.className = 'wilayah-card__header';
+
+        const wilayahTitle = document.createElement('h2');
+        wilayahTitle.className = 'wilayah-card__title';
+        const iconSpan = document.createElement('span');
+        iconSpan.textContent = WILAYAH_ICONS[wilayahName] || '📍';
+        wilayahTitle.append(iconSpan, document.createTextNode(`Wilayah ${wilayahName}`));
+
+        const wilayahBadges = document.createElement('div');
+        wilayahBadges.className = 'wilayah-card__badges';
+
+        const groupsContainer = document.createElement('div');
+        groupsContainer.className = 'wilayah-card__groups';
+
+        // Render each province/daerah in this Wilayah
+        citiesInWilayah.forEach((region, regionIndex) => {
+          const unlockedIds = Array.isArray(completedDishesByCity[region.key])
+            ? completedDishesByCity[region.key]
+            : [];
+          const totalDishes = region.dishes.length;
+          const unlockedCount = region.dishes.filter(d => unlockedIds.includes(d.id)).length;
+          const isFullUnlocked = (totalDishes > 0 && unlockedCount === totalDishes) || cookingStamps.includes(region.key);
+
+          wilayahTotalDishes += totalDishes;
+          wilayahUnlockedDishes += unlockedCount;
+          totalAllDishes += totalDishes;
+          totalAllUnlocked += unlockedCount;
+
+          if (isFullUnlocked) {
+            wilayahStampsCount++;
+            totalAllStamps++;
+          }
+
+          const group = document.createElement('section');
+          group.className = 'dish-group';
+          group.dataset.region = region.key;
+
+          const groupHeader = document.createElement('header');
+          groupHeader.className = 'dish-group__header';
+
+          const groupInfo = document.createElement('div');
+          groupInfo.className = 'dish-group__info';
+
+          const heading = document.createElement('h3');
+          heading.className = 'dish-group__title';
+          heading.id = `dish-region-${region.key}`;
+          heading.textContent = `${region.name}, ${region.city}`;
+
+          const progressLabel = document.createElement('span');
+          progressLabel.className = 'dish-group__progress';
+          progressLabel.textContent = `${unlockedCount}/${totalDishes} Masakan Terbuka`;
+
+          groupInfo.append(heading, progressLabel);
+
+          // RIGHT OF PROVINCE NAME: STEMPEL DAERAH!
+          const stampSlot = document.createElement('div');
+          stampSlot.className = `dish-group__stamp-slot ${isFullUnlocked ? 'is-stamped' : 'is-locked'}`;
+          stampSlot.setAttribute('role', 'button');
+          stampSlot.setAttribute('tabindex', '0');
+          stampSlot.setAttribute('aria-label', isFullUnlocked
+            ? `Stempel resmi ${region.name} terkoleksi`
+            : `Stempel ${region.name} belum terbuka (${unlockedCount}/${totalDishes})`);
+
+          if (isFullUnlocked) {
+            const stampImg = document.createElement('img');
+            stampImg.className = 'dish-group__stamp-img';
+            stampImg.src = region.stamp;
+            stampImg.alt = `Stempel ${region.name}`;
+            stampImg.loading = 'lazy';
+
+            const tag = document.createElement('span');
+            tag.className = 'dish-group__stamp-tag';
+            tag.textContent = 'LENGKAP';
+
+            stampSlot.append(stampImg, tag);
+          } else {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'dish-group__stamp-placeholder';
+            const lockIcon = document.createElement('span');
+            lockIcon.className = 'lock-icon';
+            lockIcon.textContent = '🔒';
+            const hint = document.createElement('span');
+            hint.className = 'hint-text';
+            hint.textContent = `${unlockedCount}/${totalDishes}`;
+            placeholder.append(lockIcon, hint);
+            stampSlot.appendChild(placeholder);
+          }
+
+          stampSlot.addEventListener('click', () => {
+            openStampModal(region, isFullUnlocked, unlockedCount, totalDishes);
+          });
+          stampSlot.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              openStampModal(region, isFullUnlocked, unlockedCount, totalDishes);
+            }
+          });
+
+          groupHeader.append(groupInfo, stampSlot);
+
+          // List of 3 dish cards
+          const list = document.createElement('ul');
+          list.className = 'dish-group__list';
+          list.setAttribute('aria-labelledby', heading.id);
+
+          region.dishes.forEach((dish, dishIdx) => {
+            const isUnlocked = unlockedIds.includes(dish.id);
+
+            const item = document.createElement('li');
+            item.className = 'dish-card-item';
+
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = `dish-card ${isUnlocked ? 'is-unlocked' : 'is-locked'}`;
+            card.dataset.dish = dish.id;
+            card.dataset.region = region.key;
+            card.setAttribute('aria-label', isUnlocked
+              ? `Lihat resep ${dish.dish}`
+              : `Masakan ${dishIdx + 1} (${region.name}) masih terkunci`);
+
+            const well = document.createElement('span');
+            well.className = 'dish-card__well';
+
+            const face = document.createElement('span');
+            face.className = 'dish-card__face';
+
+            const icon = document.createElement('span');
+            icon.className = 'dish-card__icon';
+
+            if (isUnlocked) {
+              if (dish.image) {
+                const photo = document.createElement('img');
+                photo.className = 'dish-card__photo';
+                photo.src = dish.image;
+                photo.alt = dish.dish;
+                photo.loading = 'lazy';
+                icon.appendChild(photo);
+              } else {
+                const emoji = document.createElement('span');
+                emoji.className = 'dish-card__emoji';
+                emoji.setAttribute('aria-hidden', 'true');
+                emoji.textContent = dish.emoji || '🍲';
+                icon.appendChild(emoji);
+              }
+
+              const badge = document.createElement('span');
+              badge.className = 'dish-card__badge-unlocked';
+              badge.setAttribute('aria-hidden', 'true');
+              badge.textContent = '⭐';
+              card.appendChild(badge);
+            } else {
+              // Locked dish silhouette & lock
+              const lock = document.createElement('span');
+              lock.className = 'dish-card__lock-icon';
+              lock.setAttribute('aria-hidden', 'true');
+              lock.textContent = '🔒';
+              icon.appendChild(lock);
+            }
+
+            face.appendChild(icon);
+            card.append(well, face);
+
+            const displayName = isUnlocked ? dish.dish : '???';
+            [
+              ['region', region.city, true],
+              ['name', displayName, true],
+              ['region', region.city, false],
+              ['name', displayName, false]
+            ].forEach(([type, text, shadow]) => {
+              const label = document.createElement('span');
+              label.className = `dish-card__label dish-card__label--${type}${shadow ? ' dish-card__label--shadow' : ''}`;
+              label.textContent = text;
+              if (shadow) label.setAttribute('aria-hidden', 'true');
+              card.appendChild(label);
+            });
+
+            card.addEventListener('click', () => {
+              lastFocusedCard = card;
+              if (isUnlocked) {
+                openDishStory(region, dish);
+              } else {
+                openLockedModal(region, dish);
+              }
+            });
+
+            item.appendChild(card);
+            list.appendChild(item);
+          });
+
+          group.append(groupHeader, list);
+          groupsContainer.appendChild(group);
+        });
+
+        // Add badges to Wilayah Header
+        const recipeBadge = document.createElement('span');
+        recipeBadge.className = 'wilayah-card__badge';
+        recipeBadge.textContent = `🍲 ${wilayahUnlockedDishes}/${wilayahTotalDishes} Resep`;
+
+        const stampBadge = document.createElement('span');
+        stampBadge.className = 'wilayah-card__badge';
+        stampBadge.textContent = `🏅 ${wilayahStampsCount}/${citiesInWilayah.length} Stempel`;
+
+        wilayahBadges.append(recipeBadge, stampBadge);
+        wilayahHeader.append(wilayahTitle, wilayahBadges);
+
+        wilayahCard.append(wilayahHeader, groupsContainer);
+        dishGroups.appendChild(wilayahCard);
       });
+
+      // Update global header stats
+      statRecipesCount.textContent = `${totalAllUnlocked}/${totalAllDishes}`;
+      statStampsCount.textContent = `${totalAllStamps}/${window.AyoDishCatalog.cities.length}`;
+    }
+
+    // Filter tabs click
+    wilayahTabs.addEventListener('click', event => {
+      const btn = event.target.closest('.index-tab-btn');
+      if (!btn) return;
+      wilayahTabs.querySelectorAll('.index-tab-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+
+      activeWilayahFilter = btn.dataset.wilayah;
+      document.querySelectorAll('.wilayah-card').forEach(card => {
+        if (activeWilayahFilter === 'all' || card.dataset.wilayah === activeWilayahFilter) {
+          card.hidden = false;
+        } else {
+          card.hidden = true;
+        }
+      });
+      dishGroups.scrollTop = 0;
     });
 
+    // Close buttons & modal listeners
     dishStoryClose.addEventListener('click', closeDishStory);
     dishStory.addEventListener('click', event => {
       if (event.target === dishStory) closeDishStory();
+    });
+    dishStoryCookBtn.addEventListener('click', () => {
+      if (currentActiveRegion && currentActiveDish) {
+        goToKitchen(currentActiveRegion.key, currentActiveDish.id);
+      }
+    });
+
+    lockedModalClose.addEventListener('click', closeLockedModal);
+    lockedModal.addEventListener('click', event => {
+      if (event.target === lockedModal) closeLockedModal();
+    });
+    lockedModalCookBtn.addEventListener('click', () => {
+      if (currentActiveRegion) {
+        goToKitchen(currentActiveRegion.key, currentActiveDish?.id);
+      }
+    });
+
+    stampModalClose.addEventListener('click', closeStampModal);
+    stampModal.addEventListener('click', event => {
+      if (event.target === stampModal) closeStampModal();
+    });
+    stampModalActionBtn.addEventListener('click', () => {
+      if (currentActiveRegion) {
+        goToKitchen(currentActiveRegion.key);
+      }
     });
 
     document.querySelector('.close-button').addEventListener('click', () => {
@@ -171,12 +589,25 @@
     });
 
     window.addEventListener('keydown', event => {
-      if (event.key === 'Escape' && !dishStory.hidden) {
-        closeDishStory();
-      } else if (embedded && event.key === 'Escape') {
-        window.parent.postMessage({ type: 'close-home-panel' }, window.location.origin);
+      if (event.key === 'Escape') {
+        if (!dishStory.hidden) closeDishStory();
+        else if (!lockedModal.hidden) closeLockedModal();
+        else if (!stampModal.hidden) closeStampModal();
+        else if (embedded) {
+          window.parent.postMessage({ type: 'close-home-panel' }, window.location.origin);
+        }
       }
     });
+
+    // Listen to storage changes so progress is always live
+    window.addEventListener('storage', event => {
+      if (event.key === 'ayoMasakProgress') {
+        renderIndexBook();
+      }
+    });
+
+    // Initial render
+    renderIndexBook();
   </script>
   <script src="loading-screen.js"></script>
 </body>
