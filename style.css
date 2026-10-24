@@ -2007,8 +2007,7 @@ body.page-kitchen{
       outline-offset: 1px;
     }
 
-    body.page-kitchen .tile-button--hint:focus-visible,
-    body.page-kitchen #recipeHintClose:focus-visible{
+    body.page-kitchen .tile-button--settings:focus-visible{
       outline: none;
     }
 
@@ -2017,7 +2016,7 @@ body.page-kitchen{
     }
 
     /* ==========================================================
-       Block: tile-button (home + hint)
+       Block: tile-button (home + settings + index)
        ========================================================== */
     body.page-kitchen .tile-button{
       position: absolute;
@@ -2030,34 +2029,26 @@ body.page-kitchen{
       background: transparent;
       overflow: hidden;
       cursor: pointer;
-      --button-press-depth: 9px;
-      --button-hover-depth: 2.7px;
       transition: none;
     }
 
-    body.page-kitchen .tile-button:hover{
+    body.page-kitchen button.tile-button:not(:disabled):hover,
+    body.page-kitchen button.tile-button:not(:disabled):active,
+    body.page-kitchen button.tile-button:focus-visible{
       transform: none;
       filter: none;
+      animation: none;
+      box-shadow: none;
     }
 
-    body.page-kitchen .tile-button:active{
+    body.page-kitchen .tile-button .button-art__face,
+    body.page-kitchen button.tile-button:not(:disabled):hover .button-art__face,
+    body.page-kitchen button.tile-button:not(:disabled):active .button-art__face,
+    body.page-kitchen button.tile-button:focus-visible .button-art__face{
       transform: none;
       filter: none;
-    }
-
-    body.page-kitchen .tile-button:hover .button-art__face{
-      transform: translateY(var(--button-hover-depth));
-      filter: brightness(1.06);
-    }
-
-    body.page-kitchen .tile-button:focus-visible .button-art__face{
-      transform: translateY(var(--button-hover-depth));
-      filter: brightness(1.06);
-    }
-
-    body.page-kitchen .tile-button:active .button-art__face{
-      transform: translateY(var(--button-press-depth));
-      filter: brightness(.96);
+      transition: none;
+      animation: none;
     }
 
     body.page-kitchen .tile-button--home{
@@ -2065,7 +2056,7 @@ body.page-kitchen{
       left: var(--space-19);
     }
 
-    body.page-kitchen .tile-button--hint{
+    body.page-kitchen .tile-button--settings{
       top: var(--space-36);
       right: var(--space-23);
     }
@@ -2312,7 +2303,8 @@ body.page-kitchen{
     body.page-kitchen .cook-button{
       position: absolute;
       bottom: 243px;
-      left: calc(50% - 71px);
+      left: 50%;
+      transform: translateX(-50%);
       display: block;
       width: 139px;
       height: 53px;
@@ -2328,19 +2320,16 @@ body.page-kitchen{
       box-shadow: var(--shadow-soft);
       overflow: hidden;
       cursor: pointer;
-      transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+      transition: none;
     }
 
-    body.page-kitchen .cook-button:hover{
-      transform: translateX(-50%) translateY(-3px) scale(1.04);
-      filter: brightness(1.08);
-      box-shadow: 0 7px 0 rgba(70,22,3,.55);
-    }
-
-    body.page-kitchen .cook-button:active{
-      transform: translateX(-50%) translateY(2px) scale(.97);
-      filter: brightness(.95);
-      box-shadow: 0 2px 0 rgba(70,22,3,.55);
+    body.page-kitchen button.cook-button:not(:disabled):hover,
+    body.page-kitchen button.cook-button:not(:disabled):active,
+    body.page-kitchen button.cook-button:not(:disabled):focus-visible{
+      transform: translateX(-50%);
+      filter: none;
+      box-shadow: var(--shadow-soft);
+      animation: none;
     }
 
     body.page-kitchen .cook-button__well{
@@ -2484,6 +2473,36 @@ body.page-kitchen{
 
     body.page-kitchen .kitchen-recipe-method[hidden]{
       display: none;
+    }
+
+    body.page-kitchen .kitchen-settings-sheet{
+      position: fixed;
+      z-index: 10000;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 12px;
+      background: rgba(42, 20, 8, .72);
+    }
+
+    body.page-kitchen .kitchen-settings-sheet[hidden]{
+      display: none;
+    }
+
+    body.page-kitchen .kitchen-settings-sheet__panel{
+      width: min(100%, 420px);
+      height: min(100%, 470px);
+      overflow: hidden;
+      border-radius: 24px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, .4);
+    }
+
+    body.page-kitchen .kitchen-settings-sheet__frame{
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
     }
 
     body.page-kitchen .kitchen-recipe-method__panel{
@@ -7074,10 +7093,15 @@ body.page-home .region-dish-index__item.is-unlocked .region-dish-index__number {
 }
 
 body.page-home .settings-btn,
+body.page-home .menu-btn,
 body.page-home .settings-btn:hover,
+body.page-home .menu-btn:hover,
 body.page-home .settings-btn:active,
+body.page-home .menu-btn:active,
 body.page-home .settings-btn:focus,
-body.page-home .settings-btn:focus-visible {
+body.page-home .menu-btn:focus,
+body.page-home .settings-btn:focus-visible,
+body.page-home .menu-btn:focus-visible {
   animation: none !important;
   box-shadow: none !important;
   filter: none !important;
@@ -7096,10 +7120,15 @@ body.page-home .settings-btn:focus-visible {
 }
 
 body.page-home .settings-btn img,
+body.page-home .menu-btn img,
 body.page-home .settings-btn:hover img,
+body.page-home .menu-btn:hover img,
 body.page-home .settings-btn:active img,
+body.page-home .menu-btn:active img,
 body.page-home .settings-btn:focus img,
-body.page-home .settings-btn:focus-visible img {
+body.page-home .menu-btn:focus img,
+body.page-home .settings-btn:focus-visible img,
+body.page-home .menu-btn:focus-visible img {
   animation: none !important;
   filter: none !important;
   transform: none !important;

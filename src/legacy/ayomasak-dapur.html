@@ -99,22 +99,6 @@
         </div>
       </div>
     </section>
-    <section class="story-scroll recipe-hint" id="recipeHint" hidden
-             role="dialog" aria-modal="true" aria-labelledby="recipeHintTitle">
-      <div class="story-scroll__roller" aria-hidden="true"></div>
-      <div class="story-scroll__paper" tabindex="-1" role="document">
-        <div class="story-scroll__content">
-          <button class="story-scroll__close" id="recipeHintClose" type="button" aria-label="Tutup resep">
-            <span class="story-scroll__close-icon" aria-hidden="true">×</span>
-            <span>Tutup</span>
-          </button>
-          <span class="story-scroll__eyebrow">Panduan memasak</span>
-          <h2 class="story-scroll__title" id="recipeHintTitle"></h2>
-          <p class="recipe-hint__intro" id="recipeHintIntro">Bahan yang diperlukan:</p>
-          <ul class="recipe-hint__list" id="recipeHintIngredients"></ul>
-        </div>
-      </div>
-    </section>
     <section class="kitchen-dish-book" id="kitchenDishBook" hidden
              role="dialog" aria-modal="true" aria-labelledby="kitchenDishBookTitle">
       <div class="kitchen-dish-book__panel">
@@ -131,6 +115,12 @@
                 aria-label="Tutup cara memasak">×</button>
         <h2 class="kitchen-recipe-method__title" id="kitchenRecipeMethodTitle">Cara memasak</h2>
         <p class="kitchen-recipe-method__instructions" id="kitchenRecipeMethodInstructions"></p>
+      </div>
+    </section>
+    <section class="kitchen-settings-sheet" id="kitchenSettingsSheet" hidden
+             role="dialog" aria-modal="true" aria-label="Pengaturan">
+      <div class="kitchen-settings-sheet__panel">
+        <iframe class="kitchen-settings-sheet__frame" id="kitchenSettingsFrame" title="Pengaturan"></iframe>
       </div>
     </section>
     <aside class="stamp-reward" id="stampReward" hidden aria-live="polite">
@@ -155,11 +145,10 @@
         </span>
       </button>
 
-      <button class="tile-button tile-button--hint" id="recipeHintButton" type="button"
-              aria-label="Lihat resep masakan" aria-haspopup="dialog" aria-controls="recipeHint">
+      <button class="tile-button tile-button--settings" id="kitchenSettingsBtn" type="button"
+              aria-label="Pengaturan" title="Pengaturan">
         <span class="button-art" aria-hidden="true">
-          <img class="button-art__face" src="assets/Buttons/button-hint-face.png" alt="" draggable="false">
-          <img class="button-art__frame" src="assets/Buttons/button-hint-frame.png" alt="" draggable="false">
+          <img class="button-art__face" src="assets/new_button/Property 1=Default-3.png" alt="" draggable="false">
         </span>
       </button>
 
@@ -223,12 +212,6 @@
     const storyScroll = document.getElementById('storyScroll');
     const storyScrollParent = storyScroll.parentElement;
     const storyPaper = storyScroll.querySelector('.story-scroll__paper');
-    const recipeHint = document.getElementById('recipeHint');
-    const recipeHintPaper = recipeHint.querySelector('.story-scroll__paper');
-    const recipeHintButton = document.getElementById('recipeHintButton');
-    const recipeHintCloseButton = document.getElementById('recipeHintClose');
-    const recipeHintIngredients = document.getElementById('recipeHintIngredients');
-    const recipeHintIntro = document.getElementById('recipeHintIntro');
     const kitchenDishBook = document.getElementById('kitchenDishBook');
     const kitchenDishBookButton = document.getElementById('kitchenDishBookButton');
     const kitchenDishBookClose = document.getElementById('kitchenDishBookClose');
@@ -237,11 +220,13 @@
     const kitchenRecipeMethod = document.getElementById('kitchenRecipeMethod');
     const kitchenRecipeMethodClose = document.getElementById('kitchenRecipeMethodClose');
     const kitchenRecipeMethodInstructions = document.getElementById('kitchenRecipeMethodInstructions');
+    const kitchenSettingsSheet = document.getElementById('kitchenSettingsSheet');
+    const kitchenSettingsFrame = document.getElementById('kitchenSettingsFrame');
+    document.getElementById('legacy-root').appendChild(kitchenSettingsSheet);
     let activeLockedDishButton = null;
     const stampReward = document.getElementById('stampReward');
     const continueButton = document.getElementById('continueCookingButton');
     let storyCloseTimer = null;
-    let recipeHintCloseTimer = null;
     let activeDrag = null;
     let isCooked = false;
     let isCooking = false;
@@ -728,89 +713,6 @@
       }
     }
 
-    function renderRecipeHint() {
-      const hintDish = catalogDish || guidedDish || getSuggestedDish();
-      document.getElementById('recipeHintTitle').textContent = hintDish.dish;
-      recipeHintIntro.textContent = catalogDish
-        ? 'Bahan yang diperlukan:'
-        : `Petunjuk resep daerah ${selectedCity.name}. Pilih bahan berikut, lalu tekan Masak!`;
-      recipeHintIngredients.replaceChildren();
-      hintDish.ingredients.forEach((name, index) => {
-        const ingredientId = `${hintDish.id}-${index + 1}`;
-        const recipeIngredient = availableIngredients.find(item => item.id === ingredientId);
-        if (!recipeIngredient) {
-          throw new Error(`Slot bahan "${name}" untuk resep ${hintDish.dish} tidak ditemukan.`);
-        }
-        const item = document.createElement('li');
-        item.className = 'recipe-hint__ingredient';
-        if (selectedIngredients.has(ingredientId)) item.classList.add('is-selected');
-
-        const visual = createIngredientVisual(
-          recipeIngredient,
-          recipeIngredient.image ? 'recipe-hint__image' : 'recipe-hint__emoji'
-        );
-
-        const label = document.createElement('span');
-        label.className = 'recipe-hint__name';
-        label.textContent = name;
-
-        const status = document.createElement('span');
-        status.className = 'recipe-hint__status';
-        status.textContent = selectedIngredients.has(ingredientId) ? 'Sudah di wajan' : 'Belum dimasukkan';
-
-        item.append(visual, label, status);
-        recipeHintIngredients.appendChild(item);
-      });
-    }
-
-    function finishRecipeHintClose() {
-      if (!recipeHint.classList.contains('is-closing')) return;
-      window.clearTimeout(recipeHintCloseTimer);
-      recipeHint.hidden = true;
-      recipeHint.classList.remove('is-closing');
-      recipeHintButton.focus();
-    }
-
-    function closeRecipeHint() {
-      if (recipeHint.hidden || recipeHint.classList.contains('is-closing')) return;
-      recipeHint.classList.remove('is-open');
-      recipeHint.classList.add('is-closing');
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        finishRecipeHintClose();
-        return;
-      }
-      recipeHintCloseTimer = window.setTimeout(finishRecipeHintClose, 900);
-    }
-
-    recipeHintButton.addEventListener('click', () => {
-      if (!recipeHint.hidden) return;
-      renderRecipeHint();
-      recipeHint.hidden = false;
-      recipeHint.classList.add('is-open');
-      requestAnimationFrame(() => {
-        recipeHintCloseButton.focus();
-        recipeHintPaper.scrollTop = 0;
-      });
-    });
-    recipeHintCloseButton.addEventListener('click', closeRecipeHint);
-    recipeHint.addEventListener('click', event => {
-      if (event.target === recipeHint) closeRecipeHint();
-    });
-    recipeHintPaper.addEventListener('transitionend', event => {
-      if (event.target === recipeHintPaper && event.propertyName === 'transform') {
-        finishRecipeHintClose();
-      }
-    });
-    document.addEventListener('keydown', event => {
-      if (recipeHint.hidden) return;
-      if (event.key === 'Escape') {
-        closeRecipeHint();
-      } else if (event.key === 'Tab') {
-        event.preventDefault();
-        recipeHintCloseButton.focus();
-      }
-    });
-
     document.getElementById('storyCloseButton').addEventListener('click', () => {
       if (storyScroll.hidden || storyScroll.classList.contains('is-closing')) return;
       storyScroll.classList.remove('is-open');
@@ -993,6 +895,34 @@
 
     document.getElementById('kitchenHomeBtn').addEventListener('click', () => {
       window.AyoNavigate('index.html?menu=1');
+    });
+
+    const closeKitchenSettings = () => {
+      kitchenSettingsSheet.hidden = true;
+      document.getElementById('kitchenSettingsBtn').focus();
+    };
+
+    document.getElementById('kitchenSettingsBtn').addEventListener('click', () => {
+      if (!kitchenSettingsFrame.hasAttribute('src')) {
+        kitchenSettingsFrame.src = 'ayomasak-pengaturan.html?embed=1';
+      }
+      kitchenSettingsSheet.hidden = false;
+      kitchenSettingsFrame.focus();
+    });
+
+    kitchenSettingsSheet.addEventListener('click', event => {
+      if (event.target === kitchenSettingsSheet) closeKitchenSettings();
+    });
+
+    window.addEventListener('message', event => {
+      if (event.origin !== window.location.origin ||
+          event.source !== kitchenSettingsFrame.contentWindow ||
+          event.data?.type !== 'close-home-panel') return;
+      closeKitchenSettings();
+    });
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !kitchenSettingsSheet.hidden) closeKitchenSettings();
     });
   </script>
   <script src="loading-screen.js"></script>
